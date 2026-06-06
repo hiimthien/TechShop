@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ProductVariant extends Model
 {
@@ -14,8 +15,8 @@ class ProductVariant extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function option(): BelongsTo
+    public function options(): BelongsToMany
     {
-        return $this->belongsTo(ProductAttributeOption::class, 'product_variant_options', 'variant_id', 'option_id');
+        return $this->belongsToMany(ProductAttributeOption::class, 'product_variant_options', 'variant_id', 'option_id');
     }
 }
