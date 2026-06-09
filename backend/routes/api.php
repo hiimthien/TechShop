@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CartController;
@@ -26,15 +28,19 @@ Route::get('products/{slug}', [ProductController::class, 'show']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('cart', [CartController::class, 'index']);
-    Route::post('cart/items', [CartController::class, 'store']);
-    Route::put('cart/items/{item}', [CartController::class, 'update']);
-    Route::delete('cart/items/{item}', [CartController::class, 'destroy']);
+    Route::prefix('cart')->group(function () {
+        Route::get('/', [CartController::class, 'index']);
+        Route::post('items', [CartController::class, 'store']);
+        Route::put('items/{item}', [CartController::class, 'update']);
+        Route::delete('items/{item}', [CartController::class, 'destroy']);
+    });
+
+    Route::apiResource('orders', OrderController::class)->only(['index', 'show', 'store']);
+    Route::apiResource('addresses', AddressController::class)->except(['show']);
 });
 
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('orders', [OrderController::class, 'index']);
-    Route::get('orders/{id}', [OrderController::class, 'show']);
-    Route::post('orders', [OrderController::class, 'store']);
+
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::apiResource('products', AdminProductController::class);
 });
