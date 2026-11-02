@@ -10,3 +10,14 @@
 Thumbs.db
 
 vscode-extensions.txt
+
+# Skills and Agents
+.agents/
+AGENTS.md
+
+# Design references
+stitch_nexus_tech_e_commerce/
+
+# IDE configurations
+.vscode/
+.claude/

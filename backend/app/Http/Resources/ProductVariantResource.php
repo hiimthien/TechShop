@@ -23,6 +23,7 @@ class ProductVariantResource extends JsonResource
             'sale_starts_at' => $this->sale_starts_at,
             'sale_ends_at' => $this->sale_ends_at,
             'options' => $this->options->pluck('value'),
+            'image_url' => $this->image_url,
         ];
     }
 }
