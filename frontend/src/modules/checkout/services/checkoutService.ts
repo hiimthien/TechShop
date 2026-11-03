@@ -26,12 +26,24 @@ export interface CreateAddressPayload {
 export interface CreateOrderPayload {
   address_id: number
   shipping_fee: number
+  coupon_code?: string
+  payment_method?: string
 }
 
 export interface OrderResponse {
   status: boolean
   message: string
   order_id?: number
+}
+
+export interface VnpayUrlResponse {
+  status: boolean
+  message: string
+  data: {
+    payment_url: string
+    order_id: number
+    total_price: number
+  }
 }
 
 export const checkoutService = {
@@ -49,5 +61,27 @@ export const checkoutService = {
     const res = await api.post<OrderResponse>('/orders', payload)
     return res.data
   },
-}
 
+  async createVnpayPaymentUrl(orderId: number): Promise<VnpayUrlResponse['data']> {
+    const res = await api.post<VnpayUrlResponse>('/payment/vnpay/create-url', { order_id: orderId })
+    return res.data.data
+  },
+
+  async checkCoupon(code: string, orderTotal: number): Promise<{
+    status: boolean
+    message: string
+    data?: {
+      coupon: { id: number; code: string; type: string; value: number }
+      discount_amount: number
+      final_total: number
+    }
+  }> {
+    const res = await api.post('/coupons/check', { code, order_total: orderTotal })
+    return res.data
+  },
+
+  async handleVnpayReturn(params: Record<string, string>): Promise<any> {
+    const res = await api.get('/payment/vnpay/return', { params })
+    return res.data
+  },
+}

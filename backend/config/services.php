@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', 'http://localhost:8000/api/auth/google/callback'),
+    ],
+
+    'vnpay' => [
+        'tmn_code' => env('VNPAY_TMN_CODE', 'DEMOVNPAY'),
+        'hash_secret' => env('VNPAY_HASH_SECRET', 'SECRETKEYDEMOVNPAYFORTECHSHOP123'),
+        'url' => env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
+        'return_url' => env('VNPAY_RETURN_URL', 'http://localhost:5173/checkout/vnpay-return'),
+    ],
+
 ];

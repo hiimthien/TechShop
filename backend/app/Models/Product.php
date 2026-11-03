@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
-    protected $fillable = ['name', 'slug', 'description', 'brand_id', 'category_id', 'is_active'];
+    protected $fillable = ['name', 'slug', 'description', 'specifications', 'brand_id', 'category_id', 'is_active'];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'specifications' => 'array',
     ];
 
     public function brand(): BelongsTo
@@ -37,5 +38,15 @@ class Product extends Model
     public function attributes(): HasMany
     {
         return $this->hasMany(ProductAttribute::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class)->where('is_active', true)->latest('id');
+    }
+
+    public function questions(): HasMany
+    {
+        return $this->hasMany(ProductQuestion::class)->where('is_active', true)->latest('id');
     }
 }

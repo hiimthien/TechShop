@@ -10,17 +10,40 @@ export interface ProductVariant {
   image_url?: string | null
 }
 
+export interface PromotionItem {
+  id: number
+  title: string
+  content: string
+}
+
+export interface WarrantyPackage {
+  id: string
+  name: string
+  desc: string
+  price: number
+}
+
 export interface Product {
   id: number
   name: string
   slug: string
   brand?: string
+  brand_id?: number
   category?: string
+  category_id?: number
   thumbnail: string | null
   starting_price: number | string | null
+  original_price?: number | null
+  discount_percent?: number
+  rating?: number
+  reviews_count?: number
   images?: string[]
   description?: string
   variants?: ProductVariant[]
+  specifications?: Record<string, string>
+  promotions?: PromotionItem[]
+  warranty_packages?: WarrantyPackage[]
+  related_products?: Product[]
 }
 
 export interface Category {

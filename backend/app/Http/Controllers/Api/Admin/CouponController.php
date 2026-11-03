@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Coupon;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CouponController extends Controller
 {
@@ -49,6 +51,26 @@ class CouponController extends Controller
 
         $validated['code'] = strtoupper($validated['code']);
         $coupon = Coupon::create($validated);
+
+        // Gửi thông báo có Voucher mới đến khách hàng
+        try {
+            if ($coupon->is_active) {
+                $discountText = $coupon->type === 'percentage'
+                    ? "giảm {$coupon->value}%"
+                    : 'giảm ' . number_format((float) $coupon->value) . 'đ';
+
+                NotificationService::broadcastToCustomers('coupon_created', [
+                    'title' => 'Voucher mới: ' . $coupon->code,
+                    'message' => "TechShop tặng bạn voucher {$coupon->code} {$discountText}. Hãy áp dụng ngay khi thanh toán!",
+                    'category' => 'coupon',
+                    'link' => '/account',
+                    'icon' => 'local_activity',
+                    'reference_id' => $coupon->id,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::error('Lỗi khi gửi thông báo voucher: ' . $e->getMessage());
+        }
 
         return response()->json([
             'status' => true,

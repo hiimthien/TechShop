@@ -170,6 +170,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { adminService } from '@/modules/admin/services/adminService'
+import { useToast } from '@/core/composables/useToast'
+import { useConfirmDialog } from '@/core/composables/useConfirmDialog'
+
+const toast = useToast()
+const { confirm: confirmDialog } = useConfirmDialog()
 
 interface CategoryAdminItem {
   id: number
@@ -237,27 +242,37 @@ async function submitCategory() {
       await adminService.createCategory(form.value)
     }
     showModal.value = false
+    toast.success(isEditing.value ? 'Cập nhật danh mục thành công!' : 'Tạo danh mục mới thành công!')
     await fetchCategories()
   } catch (err: unknown) {
     const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-    alert(errorMsg || 'Có lỗi xảy ra khi lưu danh mục!')
+    toast.error(errorMsg || 'Có lỗi xảy ra khi lưu danh mục!')
   } finally {
     submitting.value = false
   }
 }
 
 async function deleteCategory(cat: CategoryAdminItem) {
-  if (!confirm(`Bạn có chắc muốn xóa danh mục "${cat.name}"?`)) return
+  const isConfirmed = await confirmDialog({
+    title: `Xóa danh mục "${cat.name}"?`,
+    message: 'Các sản phẩm thuộc danh mục này có thể bị ảnh hưởng. Bạn có chắc muốn xóa không?',
+    confirmText: 'Xác nhận xóa',
+    cancelText: 'Hủy bỏ',
+    type: 'danger',
+  })
+  if (!isConfirmed) return
+
   try {
     const res = await adminService.deleteCategory(cat.id)
     if (!res.status) {
-      alert(res.message || 'Không thể xóa danh mục!')
+      toast.error(res.message || 'Không thể xóa danh mục!')
       return
     }
+    toast.success('Đã xóa danh mục thành công!')
     await fetchCategories()
   } catch (err: unknown) {
     const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-    alert(errorMsg || 'Không thể xóa danh mục!')
+    toast.error(errorMsg || 'Không thể xóa danh mục!')
   }
 }
 

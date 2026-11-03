@@ -11,31 +11,33 @@
     </div>
 
     <div class="flex flex-col lg:flex-row gap-8 items-start">
-      <!-- Sidebar Filter -->
-      <ProductFilterSidebar
-        :categories="categories"
-        :brands="brands"
-        :selected-category="selectedCategory"
-        :selected-brand-ids="selectedBrandIds"
-        :selected-min-price="selectedMinPrice"
-        :selected-max-price="selectedMaxPrice"
-        :selected-ram="selectedRam"
-        :selected-storage="selectedStorage"
-        :selected-connection="selectedConnection"
-        :selected-screen-feature="selectedScreenFeature"
-        :in-stock="inStock"
-        @update:selected-category="selectedCategory = $event"
-        @update:selected-brand-ids="selectedBrandIds = $event"
-        @update:selected-min-price="selectedMinPrice = $event"
-        @update:selected-max-price="selectedMaxPrice = $event"
-        @update:selected-ram="selectedRam = $event"
-        @update:selected-storage="selectedStorage = $event"
-        @update:selected-connection="selectedConnection = $event"
-        @update:selected-screen-feature="selectedScreenFeature = $event"
-        @update:in-stock="inStock = $event"
-        @apply="handleApplyFilter"
-        @reset="handleResetFilter"
-      />
+      <!-- Desktop Sidebar Filter (Ẩn trên màn hình mobile < lg) -->
+      <div class="hidden lg:block shrink-0">
+        <ProductFilterSidebar
+          :categories="categories"
+          :brands="brands"
+          :selected-category="selectedCategory"
+          :selected-brand-ids="selectedBrandIds"
+          :selected-min-price="selectedMinPrice"
+          :selected-max-price="selectedMaxPrice"
+          :selected-ram="selectedRam"
+          :selected-storage="selectedStorage"
+          :selected-connection="selectedConnection"
+          :selected-screen-feature="selectedScreenFeature"
+          :in-stock="inStock"
+          @update:selected-category="selectedCategory = $event"
+          @update:selected-brand-ids="selectedBrandIds = $event"
+          @update:selected-min-price="selectedMinPrice = $event"
+          @update:selected-max-price="selectedMaxPrice = $event"
+          @update:selected-ram="selectedRam = $event"
+          @update:selected-storage="selectedStorage = $event"
+          @update:selected-connection="selectedConnection = $event"
+          @update:selected-screen-feature="selectedScreenFeature = $event"
+          @update:in-stock="inStock = $event"
+          @apply="handleApplyFilter"
+          @reset="handleResetFilter"
+        />
+      </div>
 
       <!-- Main Product Section -->
       <section class="flex-grow w-full">
@@ -43,30 +45,35 @@
         <div
           class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/30 shadow-sm"
         >
-          <div class="flex items-center gap-1.5 text-xs text-on-surface-variant">
+          <div class="flex items-center gap-1.5 text-xs text-on-surface-variant shrink-0">
             <span>Hiển thị</span>
-            <strong class="text-primary font-bold">{{ products.length }}</strong>
-            <span>trên</span>
-            <strong class="text-on-surface font-bold">{{ pagination.total }}</strong>
+            <strong class="text-primary font-bold px-0.5">{{ products.length }}</strong>
+            <span>/</span>
+            <strong class="text-on-surface font-bold px-0.5">{{ pagination.total }}</strong>
             <span>sản phẩm</span>
           </div>
 
           <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
             <!-- Search Box -->
-            <div class="flex items-center flex-grow sm:flex-grow-0 sm:w-60 bg-surface-container-low rounded-xl px-3 py-1.5 border border-outline-variant/40 focus-within:border-primary">
-              <span class="material-symbols-outlined text-outline text-[18px]">search</span>
+            <div
+              class="flex items-center flex-grow sm:flex-grow-0 sm:w-64 bg-surface-container-low rounded-xl px-3 py-1.5 border border-outline-variant/40 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all"
+            >
+              <span class="material-symbols-outlined text-outline text-[18px] shrink-0 leading-none flex items-center justify-center select-none">
+                search
+              </span>
               <input
                 v-model="searchQuery"
                 @keyup.enter="handleSearch"
                 type="text"
                 placeholder="Tìm theo tên..."
-                class="w-full bg-transparent border-none focus:outline-none text-xs px-2 placeholder:text-outline"
+                class="w-full bg-transparent !border-0 !border-none !ring-0 !shadow-none !outline-none text-xs px-2 py-0 placeholder:text-outline text-on-surface leading-normal"
               />
               <button
                 v-if="searchQuery"
                 @click="clearSearch"
-                class="text-outline hover:text-on-surface"
+                class="text-outline hover:text-on-surface flex items-center justify-center shrink-0 cursor-pointer ml-1"
                 type="button"
+                aria-label="Xóa từ khóa tìm kiếm"
               >
                 <span class="material-symbols-outlined text-[16px]">close</span>
               </button>
@@ -86,6 +93,20 @@
                 <option value="name_asc">Tên: A - Z</option>
               </select>
             </div>
+
+            <!-- Nút mở Drawer bộ lọc trên Mobile (< lg) -->
+            <button
+              type="button"
+              @click="showMobileFilter = true"
+              class="lg:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-outline-variant/60 bg-surface-container-low text-xs font-bold text-on-surface hover:border-primary transition-colors shrink-0"
+            >
+              <span class="material-symbols-outlined text-[17px] text-primary">tune</span>
+              <span>Bộ lọc</span>
+              <span
+                v-if="hasActiveFilterTags"
+                class="w-2 h-2 rounded-full bg-primary"
+              ></span>
+            </button>
           </div>
         </div>
 
@@ -162,18 +183,9 @@
         <!-- Loading Skeletons -->
         <div
           v-if="isLoading"
-          class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
+          class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5"
         >
-          <div
-            v-for="n in 6"
-            :key="n"
-            class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/20 animate-pulse flex flex-col gap-3"
-          >
-            <div class="aspect-square bg-surface-container rounded-xl"></div>
-            <div class="h-4 bg-surface-container rounded w-3/4"></div>
-            <div class="h-4 bg-surface-container rounded w-1/2"></div>
-            <div class="h-5 bg-surface-container rounded w-1/3 mt-2"></div>
-          </div>
+          <ProductCardSkeleton v-for="n in 8" :key="n" />
         </div>
 
         <!-- Empty State -->
@@ -197,7 +209,7 @@
         <!-- Product Grid -->
         <div
           v-else
-          class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
+          class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5"
         >
           <ProductCard
             v-for="product in products"
@@ -215,45 +227,141 @@
         />
       </section>
     </div>
+
+    <!-- Mobile Filter Drawer (Slide-in Bottom/Right Sheet on Mobile < lg) -->
+    <Teleport to="body">
+      <div
+        v-if="showMobileFilter"
+        class="fixed inset-0 z-50 flex justify-end lg:hidden"
+      >
+        <!-- Backdrop -->
+        <div
+          class="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+          @click="showMobileFilter = false"
+        ></div>
+
+        <!-- Drawer Content -->
+        <div class="relative w-full max-w-sm bg-surface-container-lowest h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-200">
+          <div class="flex items-center justify-between p-4 border-b border-outline-variant/30">
+            <h3 class="font-black text-sm text-on-surface flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-xl">tune</span>
+              Bộ lọc sản phẩm
+            </h3>
+            <button
+              type="button"
+              @click="showMobileFilter = false"
+              class="p-1.5 text-outline hover:text-on-surface rounded-lg"
+            >
+              <span class="material-symbols-outlined text-xl">close</span>
+            </button>
+          </div>
+
+          <div class="flex-1 overflow-y-auto p-4">
+            <ProductFilterSidebar
+              :categories="categories"
+              :brands="brands"
+              :selected-category="selectedCategory"
+              :selected-brand-ids="selectedBrandIds"
+              :selected-min-price="selectedMinPrice"
+              :selected-max-price="selectedMaxPrice"
+              :selected-ram="selectedRam"
+              :selected-storage="selectedStorage"
+              :selected-connection="selectedConnection"
+              :selected-screen-feature="selectedScreenFeature"
+              :in-stock="inStock"
+              @update:selected-category="selectedCategory = $event"
+              @update:selected-brand-ids="selectedBrandIds = $event"
+              @update:selected-min-price="selectedMinPrice = $event"
+              @update:selected-max-price="selectedMaxPrice = $event"
+              @update:selected-ram="selectedRam = $event"
+              @update:selected-storage="selectedStorage = $event"
+              @update:selected-connection="selectedConnection = $event"
+              @update:selected-screen-feature="selectedScreenFeature = $event"
+              @update:in-stock="inStock = $event"
+              @apply="handleApplyFilter(); showMobileFilter = false;"
+              @reset="handleResetFilter"
+            />
+          </div>
+
+          <div class="p-4 border-t border-outline-variant/30 bg-surface-container-low flex gap-2">
+            <button
+              type="button"
+              @click="handleResetFilter"
+              class="flex-1 py-2.5 rounded-xl border border-outline-variant text-xs font-bold text-on-surface hover:bg-surface-container"
+            >
+              Đặt lại
+            </button>
+            <button
+              type="button"
+              @click="handleApplyFilter(); showMobileFilter = false;"
+              class="flex-1 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-black uppercase tracking-wider shadow-sm hover:bg-primary-hover"
+            >
+              Xem kết quả
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { productService } from '../services/productService'
 import type { Product, Category, Brand, PaginationMeta } from '../types'
 import ProductCard from '../components/ProductCard.vue'
+import ProductCardSkeleton from '@/core/components/ui/ProductCardSkeleton.vue'
 import ProductFilterSidebar from '../components/ProductFilterSidebar.vue'
 import BasePagination from '@/core/components/BasePagination.vue'
 
 const route = useRoute()
 const router = useRouter()
 
+const showMobileFilter = ref(false)
 const products = ref<Product[]>([])
 const categories = ref<Category[]>([])
 const brands = ref<Brand[]>([])
 
-const selectedCategory = ref<number | null>(
-  route.query.category_id ? Number(route.query.category_id) : null
-)
+const selectedCategory = ref<number | null>(null)
+const selectedBrandIds = ref<number[]>([])
 
-// Multi-select brands
-const parseBrandIds = (): number[] => {
+// Phân giải Category an toàn từ Slug hoặc ID
+function syncCategoryFromRoute() {
+  const catSlug = (route.query.category || route.query.category_slug) as string
+  if (catSlug && categories.value.length > 0) {
+    const match = categories.value.find((c) => c.slug.toLowerCase() === catSlug.toLowerCase())
+    if (match) {
+      selectedCategory.value = match.id
+      return
+    }
+  }
+  if (route.query.category_id) {
+    selectedCategory.value = Number(route.query.category_id)
+  }
+}
+
+// Phân giải Brands an toàn từ Slugs hoặc IDs
+function syncBrandsFromRoute() {
+  const rawBrandSlug = (route.query.brands || route.query.brand || route.query.brand_slugs || route.query.brand_slug) as string
+  if (rawBrandSlug && brands.value.length > 0) {
+    const slugList = rawBrandSlug.split(',').map((s) => s.trim().toLowerCase())
+    const matched = brands.value.filter((b) => slugList.includes(b.slug.toLowerCase())).map((b) => b.id)
+    if (matched.length > 0) {
+      selectedBrandIds.value = matched
+      return
+    }
+  }
   if (route.query.brand_ids) {
-    return String(route.query.brand_ids)
+    selectedBrandIds.value = String(route.query.brand_ids)
       .split(',')
       .map(Number)
       .filter((n) => !isNaN(n))
-  }
-  if (route.query.brand_id) {
+  } else if (route.query.brand_id) {
     const b = Number(route.query.brand_id)
-    return isNaN(b) ? [] : [b]
+    selectedBrandIds.value = isNaN(b) ? [] : [b]
   }
-  return []
 }
-
-const selectedBrandIds = ref<number[]>(parseBrandIds())
 const selectedMinPrice = ref<number | null>(
   route.query.min_price ? Number(route.query.min_price) : null
 )
@@ -274,7 +382,7 @@ const currentPage = ref<number>(
 
 const pagination = ref<PaginationMeta>({
   total: 0,
-  per_page: 9,
+  per_page: 12,
   current_page: 1,
   last_page: 1,
 })
@@ -354,8 +462,29 @@ const fetchProducts = async () => {
 
 const syncUrlParams = () => {
   const query: Record<string, string | number> = {}
-  if (selectedCategory.value) query.category_id = selectedCategory.value
-  if (selectedBrandIds.value.length > 0) query.brand_ids = selectedBrandIds.value.join(',')
+
+  // Bảo mật: Dùng Category Slug thay vì lộ ID
+  if (selectedCategory.value) {
+    const cat = categories.value.find((c) => c.id === selectedCategory.value)
+    if (cat?.slug) {
+      query.category = cat.slug
+    } else {
+      query.category_id = selectedCategory.value
+    }
+  }
+
+  // Bảo mật: Dùng Brand Slugs thay vì lộ ID
+  if (selectedBrandIds.value.length > 0) {
+    const slugs = selectedBrandIds.value
+      .map((id) => brands.value.find((b) => b.id === id)?.slug)
+      .filter(Boolean)
+    if (slugs.length > 0) {
+      query.brands = slugs.join(',')
+    } else {
+      query.brand_ids = selectedBrandIds.value.join(',')
+    }
+  }
+
   if (selectedMinPrice.value) query.min_price = selectedMinPrice.value
   if (selectedMaxPrice.value) query.max_price = selectedMaxPrice.value
   if (selectedRam.value) query.ram = selectedRam.value
@@ -417,8 +546,36 @@ const handlePageChange = (page: number) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+// Cập nhật Document Title theo bộ lọc và tìm kiếm
+watch(
+  [selectedCategoryName, searchQuery],
+  ([catName, search]) => {
+    if (search) {
+      document.title = `Tìm kiếm "${search}" | TechShop`
+    } else if (catName) {
+      document.title = `${catName} Chính Hãng | TechShop`
+    } else {
+      document.title = `Sản Phẩm Công Nghệ | TechShop`
+    }
+  },
+  { immediate: true }
+)
+
+// Lắng nghe thay đổi URL từ bên ngoài (như MegaMenu)
+watch(
+  () => route.query,
+  () => {
+    syncCategoryFromRoute()
+    syncBrandsFromRoute()
+    searchQuery.value = (route.query.search as string) || ''
+    fetchProducts()
+  }
+)
+
 onMounted(async () => {
   await fetchInitialData()
+  syncCategoryFromRoute()
+  syncBrandsFromRoute()
   await fetchProducts()
 })
 </script>

@@ -26,7 +26,7 @@
             <input
               type="checkbox"
               :checked="inStock"
-              @change="$emit('update:inStock', ($event.target as HTMLInputElement).checked)"
+              @change="toggleInStock(($event.target as HTMLInputElement).checked)"
               class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"
             />
           </label>
@@ -122,7 +122,7 @@
               </h4>
               <button
                 v-if="selectedRam"
-                @click="$emit('update:selectedRam', null)"
+                @click="clearSpecFilter('ram')"
                 class="text-[10px] text-primary hover:underline font-bold"
               >
                 Bỏ chọn
@@ -154,7 +154,7 @@
               </h4>
               <button
                 v-if="selectedStorage"
-                @click="$emit('update:selectedStorage', null)"
+                @click="clearSpecFilter('storage')"
                 class="text-[10px] text-primary hover:underline font-bold"
               >
                 Bỏ chọn
@@ -188,7 +188,7 @@
               </h4>
               <button
                 v-if="selectedConnection"
-                @click="$emit('update:selectedConnection', null)"
+                @click="clearSpecFilter('connection')"
                 class="text-[10px] text-primary hover:underline font-bold"
               >
                 Bỏ chọn
@@ -226,7 +226,7 @@
               </h4>
               <button
                 v-if="selectedScreenFeature"
-                @click="$emit('update:selectedScreenFeature', null)"
+                @click="clearSpecFilter('screen')"
                 class="text-[10px] text-primary hover:underline font-bold"
               >
                 Bỏ chọn
@@ -266,7 +266,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick } from 'vue'
 import type { Category, Brand } from '../types'
 
 interface PricePreset {
@@ -331,6 +331,11 @@ const hasActiveFilter = computed(() => {
   )
 })
 
+const toggleInStock = (checked: boolean) => {
+  emit('update:inStock', checked)
+  nextTick(() => emit('apply'))
+}
+
 const selectCategory = (id: number | null) => {
   emit('update:selectedCategory', id)
   // Khi đổi danh mục, reset các filter spec đặc thù của danh mục cũ
@@ -338,6 +343,7 @@ const selectCategory = (id: number | null) => {
   emit('update:selectedStorage', null)
   emit('update:selectedConnection', null)
   emit('update:selectedScreenFeature', null)
+  nextTick(() => emit('apply'))
 }
 
 const toggleBrand = (id: number) => {
@@ -349,27 +355,41 @@ const toggleBrand = (id: number) => {
     current.push(id)
   }
   emit('update:selectedBrandIds', current)
+  nextTick(() => emit('apply'))
 }
 
 const selectPricePreset = (preset: PricePreset) => {
   emit('update:selectedMinPrice', preset.min)
   emit('update:selectedMaxPrice', preset.max)
+  nextTick(() => emit('apply'))
 }
 
 const toggleRam = (ram: string) => {
   emit('update:selectedRam', props.selectedRam === ram ? null : ram)
+  nextTick(() => emit('apply'))
 }
 
 const toggleStorage = (storage: string) => {
   emit('update:selectedStorage', props.selectedStorage === storage ? null : storage)
+  nextTick(() => emit('apply'))
 }
 
 const toggleConnection = (conn: string) => {
   emit('update:selectedConnection', props.selectedConnection === conn ? null : conn)
+  nextTick(() => emit('apply'))
 }
 
 const toggleScreenFeature = (feat: string) => {
   emit('update:selectedScreenFeature', props.selectedScreenFeature === feat ? null : feat)
+  nextTick(() => emit('apply'))
+}
+
+const clearSpecFilter = (type: 'ram' | 'storage' | 'connection' | 'screen') => {
+  if (type === 'ram') emit('update:selectedRam', null)
+  if (type === 'storage') emit('update:selectedStorage', null)
+  if (type === 'connection') emit('update:selectedConnection', null)
+  if (type === 'screen') emit('update:selectedScreenFeature', null)
+  nextTick(() => emit('apply'))
 }
 
 const resetFilter = () => {

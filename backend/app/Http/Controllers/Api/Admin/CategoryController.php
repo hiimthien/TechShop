@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
@@ -38,6 +39,9 @@ class CategoryController extends Controller
             'slug' => Str::slug($validated['name']),
             'description' => $validated['description'] ?? null,
         ]);
+
+        Cache::forget('catalog_categories_list');
+        Cache::forget('catalog_mega_menu');
 
         return response()->json([
             'status' => true,
@@ -79,6 +83,9 @@ class CategoryController extends Controller
             'description' => $validated['description'] ?? $category->description,
         ]);
 
+        Cache::forget('catalog_categories_list');
+        Cache::forget('catalog_mega_menu');
+
         return response()->json([
             'status' => true,
             'message' => 'Cập nhật danh mục thành công',
@@ -102,6 +109,9 @@ class CategoryController extends Controller
         }
 
         $this->categoryRepository->delete($category);
+
+        Cache::forget('catalog_categories_list');
+        Cache::forget('catalog_mega_menu');
 
         return response()->json([
             'status' => true,

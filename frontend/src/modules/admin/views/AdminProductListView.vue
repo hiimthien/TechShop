@@ -8,13 +8,13 @@
           Theo dõi danh mục hàng hóa, giá bán, cấu hình biến thể và kho hàng toàn hệ thống.
         </p>
       </div>
-      <button
-        @click="openCreateModal"
+      <RouterLink
+        to="/admin/products/create"
         class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-on-primary rounded-xl text-xs font-bold hover:bg-primary-container transition-all shadow-md shadow-primary/20 active:scale-95"
       >
         <span class="material-symbols-outlined text-[18px]">add_circle</span>
         Thêm sản phẩm mới
-      </button>
+      </RouterLink>
     </div>
 
     <!-- Filter & Search Bar -->
@@ -143,13 +143,13 @@
               </td>
               <td class="py-3 px-4 text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-1.5">
-                  <button
-                    @click="openEditModal(product)"
+                  <RouterLink
+                    :to="'/admin/products/' + product.id + '/edit'"
                     class="p-1.5 rounded-lg text-primary hover:bg-primary/10 transition-colors"
                     title="Chỉnh sửa sản phẩm"
                   >
                     <span class="material-symbols-outlined text-[18px]">edit</span>
-                  </button>
+                  </RouterLink>
                   <button
                     v-if="product.id"
                     @click="deleteProduct(product.id)"
@@ -188,23 +188,18 @@
         </div>
       </div>
     </div>
-
-    <!-- Product Form Modal Component -->
-    <ProductFormModal
-      v-model="showModal"
-      :is-editing="isEditing"
-      :initial-data="selectedProduct"
-      :categories="categories"
-      :brands="brands"
-      @saved="onProductSaved"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import { adminService } from '../services/adminService'
-import ProductFormModal, { type ProductItemData } from '../components/ProductFormModal.vue'
+import { useToast } from '@/core/composables/useToast'
+import { useConfirmDialog } from '@/core/composables/useConfirmDialog'
+
+const toast = useToast()
+const { confirm: confirmDialog } = useConfirmDialog()
 
 const fallbackImage =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%23f0eded" width="100" height="100"/><text fill="%237b7487" font-family="sans-serif" font-size="12" dy="4" font-weight="bold" x="50%" y="50%" text-anchor="middle">TechShop</text></svg>'
@@ -217,6 +212,29 @@ interface CategoryOption {
 interface BrandOption {
   id: number
   name: string
+}
+
+export interface ProductItemData {
+  id?: number
+  name: string
+  slug?: string
+  brand_id?: number
+  brand?: { id: number; name: string }
+  category_id?: number
+  category?: { id: number; name: string }
+  description?: string
+  is_active?: boolean
+  thumbnail?: string
+  images?: { id?: number; image_url: string }[] | string[]
+  variants?: {
+    id?: number
+    sku: string
+    price: number | string
+    stock: number | string
+    image_url?: string
+    options?: string[]
+  }[]
+  starting_price?: number
 }
 
 const products = ref<ProductItemData[]>([])
@@ -235,10 +253,6 @@ const pagination = ref({
   last_page: 1,
   total: 0,
 })
-
-const showModal = ref(false)
-const isEditing = ref(false)
-const selectedProduct = ref<ProductItemData | null>(null)
 
 function formatPrice(val: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val)
@@ -299,32 +313,23 @@ function resetFilters() {
   fetchProducts(1)
 }
 
-function openCreateModal() {
-  isEditing.value = false
-  selectedProduct.value = null
-  showModal.value = true
-}
-
-function openEditModal(prod: ProductItemData) {
-  isEditing.value = true
-  selectedProduct.value = prod
-  showModal.value = true
-}
-
-function onProductSaved() {
-  fetchProducts(pagination.value.current_page)
-}
-
 async function deleteProduct(id: number) {
-  if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này? Thao tác này không thể hoàn tác!')) {
-    return
-  }
+  const isConfirmed = await confirmDialog({
+    title: 'Xóa sản phẩm này?',
+    message: 'Bạn có chắc chắn muốn xóa sản phẩm này không? Thao tác này không thể hoàn tác.',
+    confirmText: 'Xác nhận xóa',
+    cancelText: 'Hủy bỏ',
+    type: 'danger',
+  })
+  if (!isConfirmed) return
+
   try {
     await adminService.deleteProduct(id)
+    toast.success('Đã xóa sản phẩm thành công!')
     fetchProducts(pagination.value.current_page)
   } catch (err: unknown) {
     const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-    alert(errorMsg || 'Không thể xóa sản phẩm này!')
+    toast.error(errorMsg || 'Không thể xóa sản phẩm này!')
   }
 }
 

@@ -63,15 +63,27 @@
 
       <!-- Products Table -->
       <div>
-        <div class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">
-          Sản Phẩm Trong Đơn
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+            Sản Phẩm Trong Đơn & Gán Số Serial / IMEI
+          </span>
+          <button
+            type="button"
+            @click="handleSaveSerials"
+            :disabled="savingSerials"
+            class="text-[11px] text-primary hover:underline font-bold inline-flex items-center gap-1"
+          >
+            <span class="material-symbols-outlined text-[14px]">save</span>
+            <span>{{ savingSerials ? 'Đang lưu...' : 'Lưu tất cả Serial' }}</span>
+          </button>
         </div>
         <div class="rounded-xl border border-outline-variant/40 overflow-hidden bg-surface-container-lowest">
           <table class="w-full text-left text-xs border-collapse">
             <thead class="bg-surface-container-low text-on-surface-variant border-b border-outline-variant/40 font-bold uppercase">
               <tr>
                 <th class="py-2.5 px-3">Sản phẩm</th>
-                <th class="py-2.5 px-3 text-center">Số lượng</th>
+                <th class="py-2.5 px-3 w-44">Số Serial / IMEI máy</th>
+                <th class="py-2.5 px-3 text-center w-16">SL</th>
                 <th class="py-2.5 px-3 text-right">Đơn giá</th>
                 <th class="py-2.5 px-3 text-right">Thành tiền</th>
               </tr>
@@ -90,6 +102,14 @@
                       SKU: {{ item.variant?.sku || '-' }}
                     </div>
                   </div>
+                </td>
+                <td class="py-2.5 px-3">
+                  <input
+                    v-model="serialInputs[item.id]"
+                    type="text"
+                    placeholder="Nhập Serial / IMEI..."
+                    class="w-full px-2.5 py-1.5 rounded-lg border border-outline-variant/50 text-xs font-mono uppercase bg-surface focus:border-primary focus:ring-1 focus:ring-primary/20 text-on-surface"
+                  />
                 </td>
                 <td class="py-2.5 px-3 text-center font-bold text-on-surface">{{ item.quantity }}</td>
                 <td class="py-2.5 px-3 text-right text-on-surface-variant">{{ formatPrice(Number(item.price)) }}</td>
@@ -132,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import BaseModal from '@/core/components/BaseModal.vue'
 import { adminService, type Order } from '../services/adminService'
 
@@ -149,12 +169,19 @@ const emit = defineEmits<{
 
 const newStatus = ref('pending')
 const updatingStatus = ref(false)
+const savingSerials = ref(false)
+const serialInputs = reactive<Record<number, string>>({})
 
 watch(
   () => props.order,
   (ord) => {
     if (ord) {
       newStatus.value = ord.status
+      if (ord.items) {
+        ord.items.forEach((it) => {
+          serialInputs[it.id] = it.serial_number || ''
+        })
+      }
     }
   },
   { immediate: true }
@@ -164,10 +191,38 @@ function formatPrice(val: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val)
 }
 
+async function handleSaveSerials() {
+  if (!props.order || !props.order.items) return
+  savingSerials.value = true
+  try {
+    const payload = props.order.items.map((it) => ({
+      id: it.id,
+      serial_number: serialInputs[it.id] || '',
+    }))
+    await adminService.updateOrderSerials(props.order.id, payload)
+    alert('Đã cập nhật số Serial / IMEI cho đơn hàng thành công!')
+    emit('status-updated')
+  } catch (err: unknown) {
+    const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+    alert(errorMsg || 'Không thể lưu số Serial / IMEI')
+  } finally {
+    savingSerials.value = false
+  }
+}
+
 async function handleUpdateStatus() {
   if (!props.order) return
   updatingStatus.value = true
   try {
+    // Tự động lưu serial nếu có
+    if (props.order.items) {
+      const payload = props.order.items.map((it) => ({
+        id: it.id,
+        serial_number: serialInputs[it.id] || '',
+      }))
+      await adminService.updateOrderSerials(props.order.id, payload).catch(() => {})
+    }
+
     await adminService.updateOrderStatus(props.order.id, newStatus.value)
     emit('status-updated')
   } catch (err: unknown) {

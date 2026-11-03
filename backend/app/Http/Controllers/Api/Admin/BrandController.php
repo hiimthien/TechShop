@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Repositories\Contracts\BrandRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class BrandController extends Controller
@@ -40,6 +41,9 @@ class BrandController extends Controller
             'logo_url' => $validated['logo_url'] ?? null,
             'description' => $validated['description'] ?? null,
         ]);
+
+        Cache::forget('catalog_brands_list');
+        Cache::forget('catalog_mega_menu');
 
         return response()->json([
             'status' => true,
@@ -83,6 +87,9 @@ class BrandController extends Controller
             'description' => $validated['description'] ?? $brand->description,
         ]);
 
+        Cache::forget('catalog_brands_list');
+        Cache::forget('catalog_mega_menu');
+
         return response()->json([
             'status' => true,
             'message' => 'Cập nhật thương hiệu thành công',
@@ -106,6 +113,9 @@ class BrandController extends Controller
         }
 
         $this->brandRepository->delete($brand);
+
+        Cache::forget('catalog_brands_list');
+        Cache::forget('catalog_mega_menu');
 
         return response()->json([
             'status' => true,

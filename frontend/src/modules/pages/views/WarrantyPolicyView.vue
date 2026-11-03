@@ -129,7 +129,7 @@
             Tra cứu trạng thái tiếp nhận & sửa chữa
           </h2>
           <p class="text-xs text-on-surface-variant">
-            Nhập <strong>Mã phiếu bảo hành</strong> (VD: BH-XXXXXX) hoặc <strong>Số điện thoại</strong> đã đăng ký lúc gửi máy:
+            Nhập <strong>Số Serial / IMEI</strong> thiết bị, <strong>Mã phiếu</strong> (VD: BH-XXXXXX), hoặc <strong>Số điện thoại</strong> mua hàng:
           </p>
 
           <form @submit.prevent="handleLookup" class="flex flex-col sm:flex-row gap-3">
@@ -137,8 +137,8 @@
               v-model="lookupQuery"
               type="text"
               required
-              placeholder="VD: BH-100234 hoặc 0912345678"
-              class="flex-1 px-4 py-3 rounded-xl border border-outline-variant/40 bg-surface text-on-surface text-sm focus:outline-none focus:border-primary"
+              placeholder="VD: SN-IP16-8921, BH-100234 hoặc 0912345678"
+              class="flex-1 px-4 py-3 rounded-xl border border-outline-variant/40 bg-surface text-on-surface text-sm focus:outline-none focus:border-primary font-mono uppercase"
             />
             <button
               type="submit"
@@ -150,43 +150,92 @@
           </form>
 
           <!-- Lookup Results -->
-          <div v-if="hasSearched" class="pt-4 border-t border-outline-variant/20">
-            <div v-if="!lookupResults.length" class="text-center py-8 text-on-surface-variant text-sm">
-              Không tìm thấy phiếu bảo hành nào khớp với thông tin đã nhập.
-            </div>
-
-            <div v-else class="space-y-4">
+          <div v-if="hasSearched" class="pt-4 border-t border-outline-variant/20 space-y-6">
+            <!-- 1. Kết quả tra cứu thiết bị đã mua & thời hạn bảo hành -->
+            <div v-if="deviceResults.length > 0" class="space-y-3">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[18px]">devices</span>
+                Thông tin thiết bị & Thời hạn bảo hành
+              </h3>
               <div
-                v-for="claim in lookupResults"
-                :key="claim.id"
-                class="p-5 rounded-2xl border border-outline-variant/40 bg-surface space-y-3"
+                v-for="(dev, dIdx) in deviceResults"
+                :key="dIdx"
+                class="p-5 rounded-2xl border border-primary/20 bg-primary/5 space-y-3"
               >
                 <div class="flex flex-wrap items-center justify-between gap-2">
-                  <div class="flex items-center gap-2">
-                    <span class="font-mono font-bold text-primary text-base">{{ claim.claim_code }}</span>
-                    <span class="text-xs text-on-surface-variant">({{ claim.product_name }})</span>
+                  <div>
+                    <h4 class="font-bold text-on-surface text-sm">{{ dev.product_name }}</h4>
+                    <p class="text-xs text-on-surface-variant mt-0.5">Số Serial / IMEI: <strong class="font-mono text-primary">{{ dev.serial_number }}</strong></p>
                   </div>
                   <span
                     class="px-3 py-1 rounded-full text-xs font-bold"
-                    :class="getBadgeClass(claim.status)"
+                    :class="dev.is_expired ? 'bg-error-container text-on-error-container' : 'bg-primary text-on-primary'"
                   >
-                    {{ getStatusText(claim.status) }}
+                    {{ dev.status_label }}
                   </span>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-on-surface-variant">
-                  <div><strong>Khách hàng:</strong> {{ claim.customer_name }} ({{ claim.customer_phone }})</div>
-                  <div><strong>Số Serial:</strong> {{ claim.serial_number || 'N/A' }}</div>
-                </div>
-
-                <div class="text-xs bg-surface-container p-3 rounded-xl text-on-surface">
-                  <strong>Hiện tượng lỗi:</strong> {{ claim.issue_description }}
-                </div>
-
-                <div v-if="claim.admin_note" class="text-xs bg-primary/10 border border-primary/20 p-3 rounded-xl text-primary font-medium">
-                  <strong>Phản hồi từ Kỹ thuật viên:</strong> {{ claim.admin_note }}
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-surface p-3.5 rounded-xl border border-outline-variant/30">
+                  <div>
+                    <span class="text-on-surface-variant block">Mã đơn hàng:</span>
+                    <strong class="text-on-surface font-mono">{{ dev.order_code }}</strong>
+                  </div>
+                  <div>
+                    <span class="text-on-surface-variant block">Ngày mua / Kích hoạt:</span>
+                    <strong class="text-on-surface">{{ dev.purchase_date || 'N/A' }}</strong>
+                  </div>
+                  <div>
+                    <span class="text-on-surface-variant block">Hạn bảo hành đến:</span>
+                    <strong :class="dev.is_expired ? 'text-error' : 'text-primary'">{{ dev.warranty_expires || 'N/A' }}</strong>
+                  </div>
                 </div>
               </div>
+            </div>
+
+            <!-- 2. Danh sách phiếu bảo hành RMA -->
+            <div v-if="lookupResults.length > 0" class="space-y-3">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[18px]">build_circle</span>
+                Tiến độ xử lý phiếu bảo hành RMA
+              </h3>
+              <div class="space-y-4">
+                <div
+                  v-for="claim in lookupResults"
+                  :key="claim.id"
+                  class="p-5 rounded-2xl border border-outline-variant/40 bg-surface space-y-3"
+                >
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                      <span class="font-mono font-bold text-primary text-base">{{ claim.claim_code }}</span>
+                      <span class="text-xs text-on-surface-variant">({{ claim.product_name }})</span>
+                    </div>
+                    <span
+                      class="px-3 py-1 rounded-full text-xs font-bold"
+                      :class="getBadgeClass(claim.status)"
+                    >
+                      {{ getStatusText(claim.status) }}
+                    </span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-on-surface-variant">
+                    <div><strong>Khách hàng:</strong> {{ claim.customer_name }} ({{ claim.customer_phone }})</div>
+                    <div><strong>Số Serial:</strong> {{ claim.serial_number || 'N/A' }}</div>
+                  </div>
+
+                  <div class="text-xs bg-surface-container p-3 rounded-xl text-on-surface">
+                    <strong>Hiện tượng lỗi:</strong> {{ claim.issue_description }}
+                  </div>
+
+                  <div v-if="claim.admin_note" class="text-xs bg-primary/10 border border-primary/20 p-3 rounded-xl text-primary font-medium">
+                    <strong>Phản hồi từ Kỹ thuật viên:</strong> {{ claim.admin_note }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Trống kết quả -->
+            <div v-if="!lookupResults.length && !deviceResults.length" class="text-center py-8 text-on-surface-variant text-sm">
+              Không tìm thấy thông tin thiết bị hoặc phiếu bảo hành nào khớp với từ khóa "{{ lookupQuery }}".
             </div>
           </div>
         </div>
@@ -284,7 +333,9 @@
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import api from '@/core/api/axios'
+import { useToast } from '@/core/composables/useToast'
 
+const toast = useToast()
 const activeTab = ref<'policy' | 'lookup' | 'submit'>('policy')
 
 interface WarrantyLookupItem {
@@ -300,22 +351,45 @@ interface WarrantyLookupItem {
   created_at: string
 }
 
+interface WarrantyDeviceItem {
+  serial_number: string
+  product_name: string
+  order_code: string
+  purchase_date: string
+  warranty_expires: string
+  is_expired: boolean
+  status_label: string
+  warranty_months: number
+}
+
 // Lookup state
 const lookupQuery = ref('')
 const lookupLoading = ref(false)
 const hasSearched = ref(false)
 const lookupResults = ref<WarrantyLookupItem[]>([])
+const deviceResults = ref<WarrantyDeviceItem[]>([])
 
 async function handleLookup() {
+  if (!lookupQuery.value.trim()) return
+
   try {
     lookupLoading.value = true
     hasSearched.value = true
     const res = await api.get('/warranty-claims/lookup', {
       params: { query: lookupQuery.value.trim() },
     })
-    lookupResults.value = (res.data.data || []) as WarrantyLookupItem[]
-  } catch {
+    const payload = res.data.data
+    if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+      lookupResults.value = payload.claims || []
+      deviceResults.value = payload.devices || []
+    } else {
+      lookupResults.value = (payload || []) as WarrantyLookupItem[]
+      deviceResults.value = []
+    }
+  } catch (err) {
+    console.error('Lỗi khi tra cứu bảo hành:', err)
     lookupResults.value = []
+    deviceResults.value = []
   } finally {
     lookupLoading.value = false
   }
@@ -338,7 +412,9 @@ async function handleSubmitClaim() {
     submittingClaim.value = true
     submitSuccessMsg.value = ''
     const res = await api.post('/warranty-claims', claimForm.value)
-    submitSuccessMsg.value = res.data.message || 'Gửi yêu cầu bảo hành thành công!'
+    const successMsg = res.data.message || 'Gửi yêu cầu bảo hành thành công!'
+    submitSuccessMsg.value = successMsg
+    toast.success(successMsg)
     claimForm.value = {
       customer_name: '',
       customer_phone: '',
@@ -348,8 +424,8 @@ async function handleSubmitClaim() {
       issue_description: '',
     }
   } catch (err: unknown) {
-    const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-    alert(errorMsg || 'Có lỗi xảy ra khi gửi yêu cầu.')
+    const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Có lỗi xảy ra khi gửi yêu cầu.'
+    toast.error(errorMsg)
   } finally {
     submittingClaim.value = false
   }

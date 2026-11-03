@@ -32,4 +32,19 @@ export const authService = {
     const response = await api.get('/auth/me')
     return response.data
   },
+
+  async getGoogleAuthUrl(): Promise<{ status: boolean; url: string }> {
+    const response = await api.get('/auth/google/url')
+    return response.data
+  },
+
+  redirectToGoogle() {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+    window.location.href = `${apiUrl}/auth/google/redirect`
+  },
+
+  async googleTokenLogin(credential: string) {
+    const response = await api.post('/auth/google/token', { credential })
+    return response.data
+  },
 }

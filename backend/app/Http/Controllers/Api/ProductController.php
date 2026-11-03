@@ -19,13 +19,38 @@ class ProductController extends Controller
         ])->withMin('variants', 'price')
             ->where('is_active', true);
 
-        // Lọc danh mục
-        if ($request->filled('category_id')) {
+        // Lọc danh mục: Hỗ trợ cả slug (bảo mật SEO không lộ ID) và category_id (tương thích ngược)
+        if ($request->filled('category_slug') || $request->filled('category')) {
+            $catSlug = (string) ($request->input('category_slug') ?: $request->input('category'));
+            $aliases = [
+                'smartphones'  => 'dien-thoai',
+                'smartphone'   => 'dien-thoai',
+                'laptops'      => 'laptop',
+                'keyboards'    => 'ban-phim',
+                'keyboard'     => 'ban-phim',
+                'monitors'     => 'man-hinh',
+                'monitor'      => 'man-hinh',
+                'headphones'   => 'tai-nghe',
+                'headphone'    => 'tai-nghe',
+                'audio'        => 'tai-nghe-am-thanh',
+                'smartwatches' => 'dong-ho-thong-minh',
+                'smartwatch'   => 'dong-ho-thong-minh',
+                'watches'      => 'dong-ho-thong-minh',
+                'mouse'        => 'chuot',
+                'mice'         => 'chuot',
+            ];
+            $targetSlug = $aliases[$catSlug] ?? $catSlug;
+            $query->whereHas('category', fn($q) => $q->where('slug', $targetSlug));
+        } elseif ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 
-        // Lọc đa thương hiệu (Multi-select)
-        if ($request->filled('brand_ids')) {
+        // Lọc đa thương hiệu: Hỗ trợ cả slug (bảo mật SEO không lộ ID) và brand_ids
+        if ($request->filled('brand_slugs') || $request->filled('brands') || $request->filled('brand')) {
+            $rawBrands = $request->input('brand_slugs') ?: $request->input('brands') ?: $request->input('brand');
+            $brandSlugs = is_array($rawBrands) ? $rawBrands : explode(',', (string) $rawBrands);
+            $query->whereHas('brand', fn($q) => $q->whereIn('slug', array_filter($brandSlugs)));
+        } elseif ($request->filled('brand_ids')) {
             $brandIds = is_array($request->brand_ids)
                 ? $request->brand_ids
                 : explode(',', (string) $request->brand_ids);
@@ -125,6 +150,21 @@ class ProductController extends Controller
             ->where('slug', $slug)
             ->where('is_active', true)
             ->firstOrFail();
+
+        // Lấy danh sách 8 sản phẩm liên quan để hiển thị khối "Có thể bạn cũng thích"
+        $relatedProducts = Product::with(['brand', 'category', 'images'])
+            ->withMin('variants', 'price')
+            ->where('is_active', true)
+            ->where('id', '!=', $product->id)
+            ->where(function ($query) use ($product) {
+                $query->where('category_id', $product->category_id)
+                    ->orWhere('brand_id', $product->brand_id);
+            })
+            ->latest('id')
+            ->limit(8)
+            ->get();
+
+        $product->related_products = $relatedProducts;
 
         return response()->json(new ProductResource($product));
     }

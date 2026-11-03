@@ -15,7 +15,8 @@ class DashboardController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $data = $this->dashboardService->getDashboardMetrics();
+        $filters = $request->only(['period', 'from_date', 'to_date', 'order_status']);
+        $data = $this->dashboardService->getDashboardMetrics($filters);
 
         return response()->json([
             'status' => true,

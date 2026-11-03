@@ -6,6 +6,7 @@ export interface OrderItem {
   variant_id: number
   quantity: number
   price: string | number
+  serial_number?: string | null
   variant?: {
     id: number
     sku: string
@@ -28,6 +29,9 @@ export interface Order {
   ghn_order_code?: string
   expected_delivery_at?: string
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  payment_method?: string
+  payment_status?: string
+  payment_transaction_id?: string
   coupon_id?: number
   discount_amount?: string | number
   created_at: string
@@ -91,7 +95,10 @@ export interface WarrantyClaim {
 
 export interface DashboardSummary {
   total_revenue: number
+  all_time_revenue?: number
   total_orders: number
+  all_time_orders?: number
+  average_order_value?: number
   pending_orders: number
   processing_orders: number
   shipped_orders: number
@@ -110,14 +117,22 @@ export interface RevenuePoint {
   order_count: number
 }
 
+export interface DashboardFilterParams {
+  period?: 'today' | '7days' | '30days' | 'this_month' | 'this_year' | 'all' | 'custom'
+  from_date?: string | null
+  to_date?: string | null
+  order_status?: string | null
+}
+
 export const adminService = {
   // Dashboard
-  async getDashboard() {
-    const res = await api.get('/admin/dashboard')
+  async getDashboard(params?: DashboardFilterParams) {
+    const res = await api.get('/admin/dashboard', { params })
     return res.data.data as {
       summary: DashboardSummary
       revenue_chart: RevenuePoint[]
       recent_orders: Order[]
+      filters?: DashboardFilterParams
     }
   },
 
@@ -139,6 +154,11 @@ export const adminService = {
 
   async deleteOrder(id: number | string) {
     const res = await api.delete(`/admin/orders/${id}`)
+    return res.data
+  },
+
+  async updateOrderSerials(orderId: number | string, items: { id: number; serial_number: string }[]) {
+    const res = await api.patch(`/admin/orders/${orderId}/serials`, { items })
     return res.data
   },
 

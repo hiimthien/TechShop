@@ -4,7 +4,7 @@
     <aside class="hidden md:flex fixed left-0 h-full w-[280px] flex-col py-md gap-sm bg-surface border-r border-outline-variant/40 z-40">
       <div class="px-lg mb-md">
         <RouterLink to="/admin/dashboard" class="block">
-          <h1 class="text-headline-sm font-headline-sm font-bold text-primary">TechVina</h1>
+          <h1 class="text-headline-sm font-headline-sm font-bold text-primary">TechShop</h1>
           <p class="text-label-sm text-on-surface-variant">Admin Panel Management</p>
         </RouterLink>
       </div>
@@ -131,13 +131,16 @@
             <input class="bg-transparent border-none focus:ring-0 text-body-sm w-full outline-none placeholder:text-on-surface-variant/60" placeholder="Tìm kiếm nhanh..." type="text"/>
           </div>
 
+          <!-- Chuông thông báo Admin -->
+          <NotificationDropdown />
+
           <div class="flex items-center gap-sm">
             <div class="w-8 h-8 rounded-full bg-primary-fixed overflow-hidden border border-outline-variant flex items-center justify-center font-bold text-primary text-xs">
               {{ authStore.user?.name?.charAt(0) || 'A' }}
             </div>
             <div class="hidden sm:block text-left">
               <div class="text-label-sm font-bold text-on-surface leading-tight">{{ authStore.user?.name || 'Administrator' }}</div>
-              <div class="text-[11px] text-primary font-semibold">Admin TechVina</div>
+              <div class="text-[11px] text-primary font-semibold">Admin TechShop</div>
             </div>
           </div>
         </div>
@@ -153,8 +156,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
+import NotificationDropdown from '@/core/components/NotificationDropdown.vue'
 
 const route = useRoute()
 const router = useRouter()

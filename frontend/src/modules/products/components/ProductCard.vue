@@ -9,11 +9,17 @@
         class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
         loading="lazy"
       />
-      <div class="absolute top-md left-md flex flex-col gap-xs">
+      <div class="absolute top-2 left-2 right-2 flex flex-row items-center gap-1.5 flex-wrap pointer-events-none">
         <span
-          class="bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider"
+          class="bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs"
         >
           Trả góp 0%
+        </span>
+        <span
+          v-if="product.discount_percent && product.discount_percent > 0"
+          class="bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs"
+        >
+          -{{ product.discount_percent }}%
         </span>
       </div>
     </RouterLink>

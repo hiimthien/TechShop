@@ -1,79 +1,132 @@
 <template>
   <header
-    class="bg-surface/80 dark:bg-surface-dim/80 docked full-width top-0 sticky backdrop-blur-md border-b border-outline-variant dark:border-outline shadow-sm z-50"
+    class="bg-surface/90 dark:bg-surface-dim/90 docked full-width top-0 sticky backdrop-blur-md border-b border-outline-variant/40 dark:border-outline shadow-xs z-50"
   >
-    <div class="flex justify-between items-center w-full px-lg max-w-container-max mx-auto h-16">
-      <div class="flex items-center gap-xl">
+    <div class="flex justify-between items-center w-full px-4 max-w-7xl mx-auto h-16 gap-3 md:gap-6">
+      <!-- Cụm trái: Logo & Mega Menu -->
+      <div class="flex items-center gap-3 shrink-0">
         <RouterLink
-          class="text-headline-md font-headline-md font-black text-primary dark:text-primary-fixed-dim"
+          class="text-xl md:text-2xl font-black text-primary tracking-tight flex items-center gap-1.5 hover:opacity-90 transition-opacity"
           to="/"
         >
-          TechVina
+          <span class="material-symbols-outlined text-[26px]">devices</span>
+          <span>TechShop</span>
         </RouterLink>
-        <nav class="hidden md:flex items-center gap-lg">
-          <RouterLink
-            class="text-on-surface-variant hover:text-primary transition-colors py-2 text-label-md font-label-md"
-            to="/products"
-          >
-            Tất cả sản phẩm
-          </RouterLink>
-        </nav>
+
+        <!-- Mega Menu Button -->
+        <MegaMenu />
       </div>
 
-      <div class="flex items-center gap-md">
-        <div
-          class="hidden lg:flex items-center bg-surface-container rounded-full px-md py-xs w-64 border border-outline-variant"
+      <!-- Cụm giữa: Search Bar mở rộng kèm Live Search Preview Dropdown -->
+      <div
+        ref="searchContainerRef"
+        class="flex-1 max-w-2xl hidden sm:flex relative items-center bg-surface-container-low rounded-xl px-3.5 py-2 border border-outline-variant/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-all"
+      >
+        <span class="material-symbols-outlined text-outline text-[20px] shrink-0 leading-none select-none">search</span>
+        <input
+          v-model="headerSearch"
+          @focus="isSearchDropdownOpen = true"
+          @keyup.enter="handleHeaderSearch"
+          @keydown.esc="isSearchDropdownOpen = false"
+          class="bg-transparent !border-0 !border-none !ring-0 !shadow-none !outline-none text-xs w-full placeholder:text-outline ml-2 text-on-surface"
+          placeholder="Bạn muốn tìm sản phẩm nào hôm nay (iPhone 16, Laptop Gaming, Tai nghe...)?"
+          type="text"
+        />
+        <button
+          v-if="headerSearch"
+          @click="headerSearch = ''; isSearchDropdownOpen = false"
+          type="button"
+          class="text-outline hover:text-on-surface text-[14px]"
         >
-          <span class="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
-          <input
-            v-model="headerSearch"
-            @keyup.enter="handleHeaderSearch"
-            class="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full placeholder:text-outline ml-xs"
-            placeholder="Tìm kiếm sản phẩm..."
-            type="text"
-          />
-        </div>
+          ✕
+        </button>
 
-        <div class="flex items-center gap-sm">
-          <RouterLink
-            to="/cart"
-            class="relative p-xs text-on-surface-variant hover:bg-surface-container-low transition-all rounded-full active:scale-95 duration-150"
-            title="Giỏ hàng"
+        <!-- Live Search Dropdown Component -->
+        <SearchPreviewDropdown
+          :query="headerSearch"
+          :is-open="isSearchDropdownOpen"
+          @close="isSearchDropdownOpen = false"
+          @select-keyword="handleSelectKeyword"
+        />
+      </div>
+
+      <!-- Cụm phải: Giỏ hàng & Tài khoản -->
+      <div class="flex items-center gap-2 md:gap-3 shrink-0">
+        <!-- Giỏ hàng kèm hiệu ứng Bounce khi thêm món -->
+        <RouterLink
+          to="/cart"
+          class="relative p-2 text-on-surface hover:text-primary hover:bg-surface-container transition-all rounded-xl active:scale-95 duration-150 flex items-center gap-1.5"
+          :class="{ 'scale-110 text-primary': cartBouncing }"
+          title="Giỏ hàng"
+        >
+          <span
+            class="material-symbols-outlined text-[22px] transition-transform duration-300"
+            :class="{ 'scale-125 text-primary animate-bounce': cartBouncing }"
           >
-            <span class="material-symbols-outlined">shopping_cart</span>
-            <span
-              v-if="cartStore.totalItems > 0"
-              class="absolute -top-1 -right-1 bg-primary text-on-primary text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm"
-            >
-              {{ cartStore.totalItems > 99 ? '99+' : cartStore.totalItems }}
-            </span>
-          </RouterLink>
+            shopping_cart
+          </span>
+          <span class="text-xs font-bold hidden md:inline">Giỏ hàng</span>
+          <span
+            v-if="cartStore.totalItems > 0"
+            class="absolute -top-1 -right-1 bg-secondary text-on-secondary text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full shadow-sm transition-transform duration-300"
+            :class="{ 'scale-125 bg-primary animate-ping': cartBouncing }"
+          >
+            {{ cartStore.totalItems > 99 ? '99+' : cartStore.totalItems }}
+          </span>
+        </RouterLink>
 
-          <div v-if="user" class="flex items-center gap-sm">
-            <RouterLink
-              v-if="user.role === 'admin'"
-              to="/admin/dashboard"
-              class="px-2.5 py-1 rounded-lg bg-purple-600/10 text-purple-600 text-xs font-bold border border-purple-600/20 hover:bg-purple-600 hover:text-white transition flex items-center gap-1"
+        <!-- Thông báo (khi đã đăng nhập) -->
+        <NotificationDropdown v-if="user" />
+
+        <!-- Tài khoản & Auth -->
+        <div v-if="user" class="flex items-center gap-2">
+          <RouterLink
+            v-if="user.role === 'admin'"
+            to="/admin/dashboard"
+            class="px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-bold border border-primary/20 hover:bg-primary hover:text-on-primary transition flex items-center gap-1"
+          >
+            <span class="material-symbols-outlined text-[15px]">admin_panel_settings</span>
+            Admin
+          </RouterLink>
+          <RouterLink
+            to="/account"
+            class="flex items-center gap-2 py-1 px-2 rounded-xl hover:bg-surface-container-low transition-colors group"
+          >
+            <img
+              v-if="user.avatar"
+              :src="user.avatar"
+              :alt="user.name"
+              class="w-6 h-6 rounded-full object-cover ring-1 ring-primary/30"
+            />
+            <span
+              v-else
+              class="w-6 h-6 rounded-full bg-primary/15 text-primary text-xs font-black flex items-center justify-center"
             >
-              <span class="material-symbols-outlined text-[15px]">admin_panel_settings</span>
-              CMS Admin
-            </RouterLink>
-            <span class="text-label-md text-on-surface font-medium">{{ user.name }}</span>
-            <button @click="handleLogout" class="text-label-md text-primary hover:underline">
-              Đăng xuất
-            </button>
-          </div>
-          <div v-else class="flex items-center gap-sm">
-            <RouterLink to="/login" class="text-label-md text-on-surface-variant hover:text-primary">
-              Đăng nhập
-            </RouterLink>
-            <RouterLink
-              to="/register"
-              class="text-label-md bg-primary text-on-primary px-md py-xs rounded-lg hover:bg-primary-container transition-colors"
-            >
-              Đăng ký
-            </RouterLink>
-          </div>
+              {{ (user.name || 'U').charAt(0).toUpperCase() }}
+            </span>
+            <span class="text-xs text-on-surface group-hover:text-primary font-bold truncate max-w-[110px]">{{ user.name }}</span>
+          </RouterLink>
+          <button
+            @click="handleLogout"
+            class="text-xs text-outline hover:text-primary hover:bg-primary/5 transition-colors p-1.5 rounded-lg"
+            title="Đăng xuất"
+          >
+            <span class="material-symbols-outlined text-[18px]">logout</span>
+          </button>
+        </div>
+        <div v-else class="flex items-center gap-2">
+          <RouterLink
+            to="/login"
+            class="text-xs font-bold text-on-surface hover:text-primary px-2 py-1"
+          >
+            Đăng nhập
+          </RouterLink>
+          <RouterLink
+            to="/register"
+            class="text-xs font-bold bg-primary hover:bg-primary-container text-on-primary px-3 py-1.5 rounded-xl transition-all shadow-xs"
+          >
+            Đăng ký
+          </RouterLink>
         </div>
       </div>
     </div>
@@ -81,28 +134,69 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
 import { useCartStore } from '@/modules/cart/stores/cartStore'
+import MegaMenu from './MegaMenu.vue'
+import NotificationDropdown from '@/core/components/NotificationDropdown.vue'
+import SearchPreviewDropdown from '@/core/components/SearchPreviewDropdown.vue'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const router = useRouter()
+
 const headerSearch = ref('')
+const isSearchDropdownOpen = ref(false)
+const searchContainerRef = ref<HTMLElement | null>(null)
+const cartBouncing = ref(false)
 
 const { user } = storeToRefs(authStore)
 
 const handleHeaderSearch = () => {
   if (headerSearch.value.trim()) {
+    isSearchDropdownOpen.value = false
     router.push({ path: '/products', query: { search: headerSearch.value.trim() } })
     headerSearch.value = ''
   }
+}
+
+const handleSelectKeyword = (kw: string) => {
+  headerSearch.value = kw
+  handleHeaderSearch()
 }
 
 const handleLogout = () => {
   authStore.logout()
   router.push('/login')
 }
+
+// Bắt sự kiện giỏ hàng tăng số lượng để kích hoạt bounce effect
+watch(
+  () => cartStore.totalItems,
+  (newVal, oldVal) => {
+    if (newVal > oldVal) {
+      cartBouncing.value = true
+      setTimeout(() => {
+        cartBouncing.value = false
+      }, 800)
+    }
+  }
+)
+
+// Đóng dropdown khi click ra ngoài
+function handleClickOutside(event: MouseEvent) {
+  if (searchContainerRef.value && !searchContainerRef.value.contains(event.target as Node)) {
+    isSearchDropdownOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
