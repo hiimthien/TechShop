@@ -1,49 +1,43 @@
 <template>
   <div class="space-y-6 max-w-full">
     <!-- Header Section -->
-    <header class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-2">
-      <div>
-        <h1 class="text-2xl md:text-3xl font-bold text-on-surface tracking-tight">Quản lý thương hiệu</h1>
-        <p class="text-sm text-on-surface-variant mt-1">Danh sách đối tác, hãng sản xuất công nghệ và thương hiệu đối tác.</p>
-      </div>
-      <div>
-        <button
-          @click="openCreateModal"
-          class="bg-primary hover:bg-primary-container text-on-primary px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-md active:scale-95 text-sm font-bold"
-        >
-          <span class="material-symbols-outlined text-[20px]">add</span>
-          Thêm thương hiệu mới
-        </button>
-      </div>
-    </header>
+    <AdminPageHeader
+      title="Quản lý thương hiệu"
+      description="Danh sách đối tác, hãng sản xuất công nghệ và thương hiệu đối tác."
+      :badge-text="`${filteredBrands.length} thương hiệu`"
+      action-button-text="Thêm thương hiệu mới"
+      action-button-icon="add"
+      @action="openCreateModal"
+    />
 
     <!-- Search Section -->
-    <section class="bg-surface p-4 sm:p-5 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center justify-between">
-      <div class="relative w-full sm:w-80">
-        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
-        <input
+    <section class="bg-surface p-4 sm:p-5 rounded-2xl shadow-xs border border-outline-variant/30 flex items-center justify-between gap-4">
+      <div class="w-full sm:w-80">
+        <BaseSearchInput
           v-model="searchQuery"
-          class="w-full pl-10 pr-3 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
           placeholder="Tìm kiếm thương hiệu..."
-          type="text"
         />
       </div>
-      <div class="text-sm font-medium text-on-surface-variant hidden sm:block">
-        Tổng cộng: <strong class="text-on-surface">{{ filteredBrands.length }}</strong> thương hiệu
+      <div class="text-xs sm:text-sm font-medium text-on-surface-variant hidden sm:block shrink-0">
+        Tổng cộng: <strong class="text-on-surface font-bold">{{ filteredBrands.length }}</strong> thương hiệu
       </div>
     </section>
 
     <!-- Table Section -->
-    <section class="bg-surface rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+    <section class="bg-surface rounded-2xl shadow-xs border border-outline-variant/30 overflow-hidden">
       <div v-if="loading" class="p-16 text-center text-on-surface-variant">
         <div class="inline-block animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mb-3"></div>
         <div class="text-sm font-medium">Đang tải thương hiệu...</div>
       </div>
 
-      <div v-else-if="!filteredBrands.length" class="p-16 text-center text-on-surface-variant">
-        <span class="material-symbols-outlined text-5xl text-outline mb-2">branding_watermark</span>
-        <div class="text-lg font-bold text-on-surface">Chưa có thương hiệu nào</div>
-        <p class="text-sm text-on-surface-variant mt-1">Bấm "Thêm thương hiệu mới" để đăng ký đối tác mới</p>
+      <div v-else-if="!filteredBrands.length" class="p-12">
+        <EmptyState
+          title="Chưa có thương hiệu nào"
+          description="Bấm 'Thêm thương hiệu mới' để đăng ký đối tác mới đầu tiên của bạn."
+          icon="branding_watermark"
+          action-text="Thêm thương hiệu mới"
+          @action="openCreateModal"
+        />
       </div>
 
       <div v-else class="overflow-x-auto">
@@ -202,6 +196,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { adminService } from '@/modules/admin/services/adminService'
+import AdminPageHeader from '@/core/components/ui/AdminPageHeader.vue'
+import BaseSearchInput from '@/core/components/ui/BaseSearchInput.vue'
+import EmptyState from '@/core/components/ui/EmptyState.vue'
 
 interface BrandAdminItem {
   id: number

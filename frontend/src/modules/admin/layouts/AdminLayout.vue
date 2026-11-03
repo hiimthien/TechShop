@@ -119,7 +119,7 @@
       <!-- TopNavBar -->
       <header class="sticky top-0 w-full h-16 bg-surface/90 backdrop-blur-md border-b border-outline-variant/40 px-6 flex justify-between items-center z-30">
         <div class="flex items-center gap-md">
-          <RouterLink to="/" class="md:hidden text-primary font-bold text-lg">TechVina Admin</RouterLink>
+          <RouterLink to="/" class="md:hidden text-primary font-bold text-lg">TechShop Admin</RouterLink>
           <h2 class="text-headline-sm font-headline-sm font-bold text-on-surface hidden md:block">
             {{ pageTitle }}
           </h2>

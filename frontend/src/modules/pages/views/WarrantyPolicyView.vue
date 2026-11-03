@@ -4,7 +4,7 @@
     <nav class="flex items-center gap-xs text-xs text-on-surface-variant mb-8">
       <RouterLink to="/" class="hover:text-primary transition-colors">Trang chủ</RouterLink>
       <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-      <span class="text-on-surface font-medium">Trung tâm bảo hành TechVina</span>
+      <span class="text-on-surface font-medium">Trung tâm bảo hành TechShop</span>
     </nav>
 
     <div class="max-w-4xl mx-auto space-y-8">
@@ -57,7 +57,7 @@
             1. Chính sách Đổi mới trong 30 ngày
           </h2>
           <p class="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-            Trong vòng <strong>30 ngày</strong> đầu tiên kể từ thời điểm nhận hàng, nếu sản phẩm gặp bất kỳ lỗi kỹ thuật nào do nhà sản xuất (không phải lỗi người dùng), TechVina cam kết thực hiện:
+            Trong vòng <strong>30 ngày</strong> đầu tiên kể từ thời điểm nhận hàng, nếu sản phẩm gặp bất kỳ lỗi kỹ thuật nào do nhà sản xuất (không phải lỗi người dùng), TechShop cam kết thực hiện:
           </p>
           <ul class="list-disc list-inside text-xs md:text-sm text-on-surface-variant space-y-2 pl-2">
             <li>Đổi ngay sản phẩm mới cùng model, cùng màu sắc và cấu hình.</li>
@@ -250,7 +250,7 @@
               Đăng ký phiếu bảo hành online
             </h2>
             <p class="text-xs text-on-surface-variant mt-1">
-              Điền thông tin sự cố sản phẩm. Bộ phận CSKH TechVina sẽ liên hệ xác nhận và hướng dẫn gửi thiết bị về trung tâm bảo hành gần nhất.
+              Điền thông tin sự cố sản phẩm. Bộ phận CSKH TechShop sẽ liên hệ xác nhận và hướng dẫn gửi thiết bị về trung tâm bảo hành gần nhất.
             </p>
           </div>
 

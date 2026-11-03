@@ -124,16 +124,18 @@ export interface DashboardFilterParams {
   order_status?: string | null
 }
 
+export interface DashboardData {
+  summary: DashboardSummary
+  revenue_chart: RevenuePoint[]
+  recent_orders: Order[]
+  filters?: DashboardFilterParams
+}
+
 export const adminService = {
   // Dashboard
-  async getDashboard(params?: DashboardFilterParams) {
+  async getDashboard(params?: DashboardFilterParams): Promise<DashboardData> {
     const res = await api.get('/admin/dashboard', { params })
-    return res.data.data as {
-      summary: DashboardSummary
-      revenue_chart: RevenuePoint[]
-      recent_orders: Order[]
-      filters?: DashboardFilterParams
-    }
+    return res.data.data as DashboardData
   },
 
   // Orders

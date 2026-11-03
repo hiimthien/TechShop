@@ -1,22 +1,14 @@
 <template>
   <div class="space-y-lg max-w-container-max mx-auto">
     <!-- Header Section -->
-    <header class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-sm mb-md">
-      <div>
-        <h1 class="text-headline-lg font-headline-lg font-bold text-on-surface tracking-tight">Quản lý đơn hàng</h1>
-        <p class="text-body-md font-body-md text-on-surface-variant mt-1">Theo dõi và xử lý các đơn đặt hàng từ khách hàng.</p>
-      </div>
-      <div>
-        <button
-          @click="fetchOrders(1)"
-          :disabled="loading"
-          class="bg-surface-container hover:bg-surface-container-high text-on-surface px-lg py-md rounded-lg flex items-center gap-xs transition-all shadow-sm text-label-md font-label-md border border-outline-variant/30"
-        >
-          <span class="material-symbols-outlined text-[18px]" :class="{ 'animate-spin': loading }">refresh</span>
-          Làm mới
-        </button>
-      </div>
-    </header>
+    <AdminPageHeader
+      title="Quản lý đơn hàng"
+      description="Theo dõi và xử lý các đơn đặt hàng từ khách hàng."
+      :badge-text="`${pagination.total} đơn hàng`"
+      action-button-text="Làm mới"
+      action-button-icon="refresh"
+      @action="fetchOrders(1)"
+    />
 
     <!-- Filter Bar Section -->
     <section class="bg-surface p-lg rounded-xl shadow-sm border border-outline-variant/30">
@@ -147,27 +139,14 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="pagination.total > pagination.per_page" class="p-lg border-t border-outline-variant/30 flex items-center justify-between text-body-sm text-on-surface-variant">
-        <div>
-          Trang {{ pagination.current_page }} / {{ pagination.last_page }} (Tổng {{ pagination.total }} đơn hàng)
-        </div>
-        <div class="flex items-center gap-sm">
-          <button
-            :disabled="pagination.current_page <= 1"
-            @click="fetchOrders(pagination.current_page - 1)"
-            class="px-md py-xs rounded-lg bg-surface-container hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed text-on-surface font-bold text-label-md transition"
-          >
-            Trang trước
-          </button>
-          <button
-            :disabled="pagination.current_page >= pagination.last_page"
-            @click="fetchOrders(pagination.current_page + 1)"
-            class="px-md py-xs rounded-lg bg-surface-container hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed text-on-surface font-bold text-label-md transition"
-          >
-            Trang sau
-          </button>
-        </div>
-      </div>
+      <BasePagination
+        v-if="pagination.total > pagination.per_page"
+        :current-page="pagination.current_page"
+        :last-page="pagination.last_page"
+        :total="pagination.total"
+        :per-page="pagination.per_page"
+        @change-page="fetchOrders"
+      />
     </section>
 
     <!-- Order Detail & Status Modal Component -->
@@ -184,6 +163,8 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { adminService, type Order } from '@/modules/admin/services/adminService'
 import OrderDetailModal from '../components/OrderDetailModal.vue'
+import AdminPageHeader from '@/core/components/ui/AdminPageHeader.vue'
+import BasePagination from '@/core/components/ui/BasePagination.vue'
 
 const route = useRoute()
 const loading = ref(true)

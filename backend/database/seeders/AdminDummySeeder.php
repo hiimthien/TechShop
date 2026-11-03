@@ -29,7 +29,7 @@ class AdminDummySeeder extends Seeder
         // 1. Seed Coupons
         $coupons = [
             [
-                'code' => 'TECHVINA10',
+                'code' => 'TECHSHOP10',
                 'type' => 'percentage',
                 'value' => 10,
                 'min_order_value' => 500000,
@@ -40,7 +40,7 @@ class AdminDummySeeder extends Seeder
                 'is_active' => true,
             ],
             [
-                'code' => 'TECHVINA50K',
+                'code' => 'TECHSHOP50K',
                 'type' => 'fixed',
                 'value' => 50000,
                 'min_order_value' => 300000,

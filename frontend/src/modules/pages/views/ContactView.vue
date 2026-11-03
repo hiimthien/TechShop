@@ -13,7 +13,7 @@
           Hỗ trợ 24/7
         </span>
         <h1 class="text-3xl md:text-4xl font-black text-on-surface leading-tight">
-          Liên hệ với TechVina
+          Liên hệ với TechShop
         </h1>
         <p class="text-xs md:text-sm text-on-surface-variant mt-2">
           Chúng tôi luôn sẵn sàng lắng nghe và giải đáp mọi thắc mắc của bạn về sản phẩm và dịch vụ.
@@ -39,7 +39,7 @@
           </div>
           <h3 class="font-bold text-sm text-on-surface">Email hỗ trợ</h3>
           <p class="text-xs text-on-surface-variant">Giải đáp khiếu nại & hợp tác</p>
-          <a href="mailto:support@techvina.vn" class="text-primary font-bold text-sm hover:underline">support@techvina.vn</a>
+          <a href="mailto:support@techshop.vn" class="text-primary font-bold text-sm hover:underline">support@techshop.vn</a>
           <span class="text-[11px] text-outline">Phản hồi trong 2 giờ</span>
         </div>
 

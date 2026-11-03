@@ -53,7 +53,7 @@
           2. Quy định đồng kiểm khi nhận hàng
         </h2>
         <p class="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-          TechVina khuyến khích khách hàng thực hiện <strong>đồng kiểm</strong> (mở thùng kiểm tra ngoại quan cùng nhân viên giao hàng):
+          TechShop khuyến khích khách hàng thực hiện <strong>đồng kiểm</strong> (mở thùng kiểm tra ngoại quan cùng nhân viên giao hàng):
         </p>
         <ul class="list-disc list-inside text-xs md:text-sm text-on-surface-variant space-y-2 pl-2">
           <li>Kiểm tra tình trạng hộp bên ngoài, tem niêm phong và phụ kiện đi kèm.</li>
@@ -68,7 +68,7 @@
           3. Quy trình đổi trả hàng
         </h2>
         <ol class="list-decimal list-inside text-xs md:text-sm text-on-surface-variant space-y-2 pl-2">
-          <li>Liên hệ tổng đài hoặc mang trực tiếp sản phẩm đến trung tâm bảo hành của TechVina.</li>
+          <li>Liên hệ tổng đài hoặc mang trực tiếp sản phẩm đến trung tâm bảo hành của TechShop.</li>
           <li>Kỹ thuật viên kiểm tra xác nhận tình trạng lỗi phần cứng.</li>
           <li>Thực hiện đổi máy mới ngay tại quầy hoặc gửi hàng đổi về tận nhà khách hàng hoàn toàn miễn phí.</li>
         </ol>

@@ -5,13 +5,13 @@
     >
       <div class="flex flex-col gap-md">
         <RouterLink to="/" class="text-xl font-black text-primary">
-          TechVina
+          TechShop
         </RouterLink>
         <p class="text-sm text-on-surface-variant max-w-[320px] leading-relaxed">
           Hệ thống bán lẻ điện thoại, laptop và phụ kiện công nghệ hàng đầu Việt Nam.
         </p>
         <div class="text-xs text-on-surface-variant">
-          © {{ currentYear }} TechVina Electronics. All rights reserved.
+          © {{ currentYear }} TechShop Electronics. All rights reserved.
         </div>
       </div>
 

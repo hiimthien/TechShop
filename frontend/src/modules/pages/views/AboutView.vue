@@ -16,7 +16,7 @@
         Đồng hành cùng tương lai <br /><span class="text-primary">Công nghệ</span> của bạn
       </h1>
       <p class="text-sm md:text-base text-on-surface-variant leading-relaxed">
-        TechVina là hệ thống bán lẻ thiết bị công nghệ chính hãng hàng đầu Việt Nam. Chúng tôi cam kết mang lại sản phẩm chất lượng cao cùng dịch vụ hậu mãi chuẩn quốc tế.
+        TechShop là hệ thống bán lẻ thiết bị công nghệ chính hãng hàng đầu Việt Nam. Chúng tôi cam kết mang lại sản phẩm chất lượng cao cùng dịch vụ hậu mãi chuẩn quốc tế.
       </p>
     </section>
 
@@ -44,7 +44,7 @@
     <section class="space-y-8">
       <div class="text-center max-w-xl mx-auto">
         <h2 class="text-2xl font-black text-on-surface">Giá trị cốt lõi</h2>
-        <p class="text-xs md:text-sm text-on-surface-variant mt-1">Những tiêu chí hàng đầu tạo nên uy tín của TechVina</p>
+        <p class="text-xs md:text-sm text-on-surface-variant mt-1">Những tiêu chí hàng đầu tạo nên uy tín của TechShop</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

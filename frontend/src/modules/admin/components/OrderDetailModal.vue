@@ -3,7 +3,7 @@
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
     :title="order ? `Chi tiết đơn hàng #${order.id}` : 'Chi tiết đơn hàng'"
-    max-width="max-w-3xl"
+    max-width="3xl"
   >
     <div v-if="order" class="space-y-5">
       <!-- Status Updater Box -->
@@ -153,7 +153,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
-import BaseModal from '@/core/components/BaseModal.vue'
+import BaseModal from '@/core/components/ui/BaseModal.vue'
 import { adminService, type Order } from '../services/adminService'
 
 interface Props {

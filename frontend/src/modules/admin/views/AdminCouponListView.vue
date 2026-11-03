@@ -162,7 +162,7 @@
               v-model="form.code"
               required
               type="text"
-              placeholder="VD: TECHVINA50"
+              placeholder="VD: TECHSHOP50"
               class="w-full px-md py-md bg-surface-container-low border border-outline-variant rounded-lg font-mono font-bold uppercase text-body-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>

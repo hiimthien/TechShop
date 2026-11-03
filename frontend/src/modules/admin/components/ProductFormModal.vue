@@ -3,7 +3,7 @@
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
     :title="isEditing ? 'Chỉnh sửa thông tin sản phẩm' : 'Thêm sản phẩm mới vào hệ thống'"
-    max-width="max-w-4xl"
+    max-width="4xl"
   >
     <form id="productForm" @submit.prevent="handleSubmit" class="space-y-5">
       <!-- 1. General Info -->
@@ -116,7 +116,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import BaseModal from '@/core/components/BaseModal.vue'
+import BaseModal from '@/core/components/ui/BaseModal.vue'
 import ProductImageUploader from './ProductImageUploader.vue'
 import ProductVariantManager, { type VariantItem } from './ProductVariantManager.vue'
 import { adminService } from '../services/adminService'

@@ -1,21 +1,21 @@
 <template>
   <div class="space-y-6">
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-black text-on-surface">Quản lý sản phẩm</h1>
-        <p class="text-xs text-on-surface-variant mt-1">
-          Theo dõi danh mục hàng hóa, giá bán, cấu hình biến thể và kho hàng toàn hệ thống.
-        </p>
-      </div>
-      <RouterLink
-        to="/admin/products/create"
-        class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-on-primary rounded-xl text-xs font-bold hover:bg-primary-container transition-all shadow-md shadow-primary/20 active:scale-95"
-      >
-        <span class="material-symbols-outlined text-[18px]">add_circle</span>
-        Thêm sản phẩm mới
-      </RouterLink>
-    </div>
+    <AdminPageHeader
+      title="Quản lý sản phẩm"
+      description="Theo dõi danh mục hàng hóa, giá bán, cấu hình biến thể và kho hàng toàn hệ thống."
+      :badge-text="`${pagination.total} sản phẩm`"
+    >
+      <template #actions>
+        <RouterLink
+          to="/admin/products/create"
+          class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-on-primary rounded-xl text-xs font-bold hover:bg-primary-hover transition-all shadow-md shadow-primary/20 active:scale-95"
+        >
+          <span class="material-symbols-outlined text-[18px]">add_circle</span>
+          Thêm sản phẩm mới
+        </RouterLink>
+      </template>
+    </AdminPageHeader>
 
     <!-- Filter & Search Bar -->
     <div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/30 flex flex-wrap items-center justify-between gap-4">
@@ -166,27 +166,14 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="pagination.last_page > 1" class="p-4 border-t border-outline-variant/30 flex items-center justify-between">
-        <span class="text-xs text-on-surface-variant">
-          Hiển thị trang {{ pagination.current_page }} / {{ pagination.last_page }} (Tổng cộng {{ pagination.total }} sản phẩm)
-        </span>
-        <div class="flex items-center gap-1.5">
-          <button
-            :disabled="pagination.current_page <= 1"
-            @click="fetchProducts(pagination.current_page - 1)"
-            class="px-2.5 py-1 rounded-lg border border-outline-variant text-xs disabled:opacity-40 hover:bg-surface-container transition-colors"
-          >
-            Trước
-          </button>
-          <button
-            :disabled="pagination.current_page >= pagination.last_page"
-            @click="fetchProducts(pagination.current_page + 1)"
-            class="px-2.5 py-1 rounded-lg border border-outline-variant text-xs disabled:opacity-40 hover:bg-surface-container transition-colors"
-          >
-            Sau
-          </button>
-        </div>
-      </div>
+      <BasePagination
+        v-if="pagination.last_page > 1"
+        :current-page="pagination.current_page"
+        :last-page="pagination.last_page"
+        :total="pagination.total"
+        :per-page="pagination.per_page"
+        @change-page="fetchProducts"
+      />
     </div>
   </div>
 </template>
@@ -197,6 +184,8 @@ import { RouterLink } from 'vue-router'
 import { adminService } from '../services/adminService'
 import { useToast } from '@/core/composables/useToast'
 import { useConfirmDialog } from '@/core/composables/useConfirmDialog'
+import AdminPageHeader from '@/core/components/ui/AdminPageHeader.vue'
+import BasePagination from '@/core/components/ui/BasePagination.vue'
 
 const toast = useToast()
 const { confirm: confirmDialog } = useConfirmDialog()
@@ -252,6 +241,7 @@ const pagination = ref({
   current_page: 1,
   last_page: 1,
   total: 0,
+  per_page: 15,
 })
 
 function formatPrice(val: number) {
@@ -295,6 +285,7 @@ async function fetchProducts(page = 1) {
         current_page: res.current_page || 1,
         last_page: res.last_page || 1,
         total: res.total ?? items.length,
+        per_page: res.per_page || 10,
       }
     }
   } catch (err: unknown) {
