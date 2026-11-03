@@ -73,6 +73,12 @@ class PaymentController extends Controller
         }
 
         if ($result['is_success']) {
+            // Xác thực số tiền thanh toán khớp với giá trị đơn hàng
+            $vnpAmount = (float) ($params['vnp_Amount'] ?? 0) / 100;
+            if (abs($vnpAmount - (float) $order->total_price) > 1.0) {
+                return $this->errorResponse('Số tiền thanh toán không khớp với hóa đơn đơn hàng.', 400);
+            }
+
             // Idempotent update: chỉ cập nhật nếu chưa ghi nhận paid
             if ($order->payment_status !== 'paid') {
                 DB::transaction(function () use ($order, $result) {

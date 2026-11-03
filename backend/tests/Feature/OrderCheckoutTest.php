@@ -129,4 +129,29 @@ class OrderCheckoutTest extends TestCase
             'payment_method' => 'cod',
         ]);
     }
+
+    public function test_order_creation_rejects_address_belonging_to_another_user(): void
+    {
+        $userA = User::factory()->create();
+        $userB = User::factory()->create();
+
+        $addressB = Address::create([
+            'user_id'    => $userB->id,
+            'name'       => 'User B',
+            'phone'      => '0987654322',
+            'address'    => '456 Nguyen Hue',
+            'city'       => 'TP.HCM',
+            'is_default' => true,
+        ]);
+
+        $response = $this->actingAs($userA)
+            ->postJson('/api/orders', [
+                'address_id'     => $addressB->id,
+                'shipping_fee'   => 30000,
+                'payment_method' => 'cod',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['address_id']);
+    }
 }

@@ -43,7 +43,33 @@ class WarrantyService
             ->orWhere('customer_phone', $search)
             ->orWhere('serial_number', $search)
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($claim) {
+                $phone = (string) $claim->customer_phone;
+                $maskedPhone = strlen($phone) >= 7
+                    ? substr($phone, 0, 3) . '****' . substr($phone, -3)
+                    : '***';
+
+                $name = (string) $claim->customer_name;
+                $words = explode(' ', trim($name));
+                $maskedName = implode(' ', array_map(function ($word) {
+                    return mb_strlen($word) > 1 ? mb_substr($word, 0, 1) . '***' : $word;
+                }, $words));
+
+                return [
+                    'id'                => $claim->id,
+                    'claim_code'        => $claim->claim_code,
+                    'customer_name'     => $maskedName,
+                    'customer_phone'    => $maskedPhone,
+                    'product_name'      => $claim->product_name,
+                    'serial_number'     => $claim->serial_number,
+                    'issue_description' => $claim->issue_description,
+                    'status'            => $claim->status,
+                    'admin_note'        => $claim->admin_note,
+                    'created_at'        => $claim->created_at?->format('d/m/Y H:i'),
+                    'updated_at'        => $claim->updated_at?->format('d/m/Y H:i'),
+                ];
+            });
 
         // Tra cứu thông tin thiết bị và hạn bảo hành theo Serial / IMEI
         $orderItems = \App\Models\OrderItem::with(['order.user', 'variant.product'])

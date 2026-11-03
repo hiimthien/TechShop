@@ -78,30 +78,56 @@ class ProductService
     protected function syncVariants(Product $product, array $data): void
     {
         if (!empty($data['variants']) && is_array($data['variants'])) {
-            $product->variants()->delete();
             $attribute = ProductAttribute::firstOrCreate(
                 ['product_id' => $product->id, 'name' => 'Phiên bản']
             );
 
+            $existingVariants = $product->variants()->get()->keyBy('id');
+            $keptVariantIds = [];
+
             foreach ($data['variants'] as $v) {
+                $variantId = !empty($v['id']) ? (int) $v['id'] : null;
                 $sku = !empty($v['sku'])
                     ? $v['sku']
                     : strtoupper(Str::slug($product->name, '-')) . '-' . rand(1000, 9999);
 
-                $variant = ProductVariant::create([
-                    'product_id' => $product->id,
-                    'sku' => $sku,
-                    'price' => $v['price'] ?? 0,
-                    'stock' => $v['stock'] ?? 10,
-                    'image_url' => $v['image_url'] ?? null,
-                ]);
+                if ($variantId && $existingVariants->has($variantId)) {
+                    $variant = $existingVariants->get($variantId);
+                    $variant->update([
+                        'sku'       => $sku,
+                        'price'     => $v['price'] ?? $variant->price,
+                        'stock'     => $v['stock'] ?? $variant->stock,
+                        'image_url' => $v['image_url'] ?? $variant->image_url,
+                    ]);
+                } else {
+                    $variant = ProductVariant::create([
+                        'product_id' => $product->id,
+                        'sku'        => $sku,
+                        'price'      => $v['price'] ?? 0,
+                        'stock'      => $v['stock'] ?? 10,
+                        'image_url'  => $v['image_url'] ?? null,
+                    ]);
+                }
+
+                $keptVariantIds[] = $variant->id;
 
                 if (!empty($v['sku_name'])) {
                     $option = ProductAttributeOption::firstOrCreate([
                         'product_attribute_id' => $attribute->id,
-                        'value' => trim($v['sku_name']),
+                        'value'                => trim($v['sku_name']),
                     ]);
                     $variant->options()->syncWithoutDetaching([$option->id]);
+                }
+            }
+
+            // Xóa an toàn các variant không còn dùng (bảo vệ lịch sử đơn hàng nếu đã có người mua)
+            $toDelete = $existingVariants->except($keptVariantIds);
+            foreach ($toDelete as $deletedVariant) {
+                $hasOrders = \App\Models\OrderItem::where('variant_id', $deletedVariant->id)->exists();
+                if (!$hasOrders) {
+                    $deletedVariant->delete();
+                } else {
+                    $deletedVariant->update(['stock' => 0]);
                 }
             }
         } elseif (isset($data['price']) || isset($data['stock'])) {

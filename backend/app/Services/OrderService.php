@@ -93,9 +93,17 @@ class OrderService
                         ]);
                     }
 
-                    // Trừ tồn kho nguyên tử (atomic decrement)
+                    // Trừ tồn kho nguyên tử (atomic conditional decrement) chống race condition đa người dùng
                     foreach ($cart->items as $item) {
-                        $item->variant->decrement('stock', $item->quantity);
+                        $affected = DB::table('product_variants')
+                            ->where('id', $item->variant_id)
+                            ->where('stock', '>=', $item->quantity)
+                            ->decrement('stock', $item->quantity);
+
+                        if ($affected === 0) {
+                            $skuName = $item->variant ? $item->variant->sku : "ID {$item->variant_id}";
+                            throw new \Exception("Sản phẩm ({$skuName}) vừa hết hàng do có đơn hàng khác thanh toán trước.");
+                        }
                     }
 
                     // Xóa giỏ hàng sau khi tạo đơn thành công

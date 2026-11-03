@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class OrderRepository implements OrderRepositoryInterface
 {
@@ -62,9 +63,21 @@ class OrderRepository implements OrderRepositoryInterface
 
     public function updateStatus(int|string $id, string $status): Order
     {
-        $order = Order::findOrFail($id);
-        $order->status = $status;
-        $order->save();
+        $order = Order::with('items.variant')->findOrFail($id);
+        $oldStatus = $order->status;
+
+        DB::transaction(function () use ($order, $status, $oldStatus) {
+            $order->status = $status;
+            $order->save();
+
+            // Tự động hoàn lại tồn kho nếu admin chuyển trạng thái sang đã hủy
+            if ($status === 'cancelled' && $oldStatus !== 'cancelled') {
+                foreach ($order->items as $item) {
+                    $item->variant?->increment('stock', $item->quantity);
+                }
+            }
+        });
+
         return $order;
     }
 
