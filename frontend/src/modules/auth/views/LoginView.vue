@@ -108,36 +108,29 @@
         </button>
 
         <!-- Quick Demo Login Section for Portfolio Reviewers -->
-        <div class="mt-6 pt-5 border-t border-outline-variant/30 space-y-2.5">
-          <div class="text-[11px] font-bold text-on-surface-variant flex items-center justify-between">
-            <span class="flex items-center gap-1">
-              <span class="material-symbols-outlined text-[14px] text-primary">bolt</span>
-              Trải nghiệm nhanh (Tài khoản Demo)
-            </span>
-            <span class="text-[10px] text-outline">1-Click</span>
+        <div class="mt-6 pt-5 border-t border-outline-variant/30 space-y-2">
+          <div class="flex items-center justify-between text-[11px] font-medium text-on-surface-variant">
+            <span>Tài khoản dùng thử</span>
+            <span class="text-[10px] text-outline uppercase tracking-wider">Quick access</span>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <button
               type="button"
               @click="quickLogin('admin@techshop.com', 'password')"
-              class="py-2 px-3 bg-surface-container hover:bg-surface-container-high rounded-xl text-left border border-outline-variant/30 transition-all hover:border-primary/50 group"
+              class="py-2 px-3 bg-surface-container-low hover:bg-surface-container rounded-xl text-left border border-outline-variant/30 transition-colors text-xs"
             >
-              <div class="text-[11px] font-bold text-on-surface group-hover:text-primary flex items-center gap-1">
-                <span>👑</span> Admin CMS
-              </div>
-              <div class="text-[10px] text-outline mt-0.5 truncate">Quản trị & Doanh thu</div>
+              <div class="font-bold text-on-surface">Admin Portal</div>
+              <div class="text-[10px] text-outline mt-0.5">admin@techshop.com</div>
             </button>
 
             <button
               type="button"
               @click="quickLogin('customer@techshop.com', 'password')"
-              class="py-2 px-3 bg-surface-container hover:bg-surface-container-high rounded-xl text-left border border-outline-variant/30 transition-all hover:border-primary/50 group"
+              class="py-2 px-3 bg-surface-container-low hover:bg-surface-container rounded-xl text-left border border-outline-variant/30 transition-colors text-xs"
             >
-              <div class="text-[11px] font-bold text-on-surface group-hover:text-primary flex items-center gap-1">
-                <span>👤</span> Khách hàng
-              </div>
-              <div class="text-[10px] text-outline mt-0.5 truncate">Mua sắm & Đơn hàng</div>
+              <div class="font-bold text-on-surface">Khách hàng</div>
+              <div class="text-[10px] text-outline mt-0.5">customer@techshop.com</div>
             </button>
           </div>
         </div>
