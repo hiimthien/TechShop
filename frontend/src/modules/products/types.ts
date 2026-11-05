@@ -29,8 +29,10 @@ export interface Product {
   slug: string
   brand?: string
   brand_id?: number
+  brand_slug?: string
   category?: string
   category_id?: number
+  category_slug?: string
   thumbnail: string | null
   starting_price: number | string | null
   original_price?: number | null
@@ -72,9 +74,13 @@ export interface ProductListResponse {
 }
 
 export interface ProductFilterParams {
-  category_id?: number | null
+  category_id?: number | string | null
+  category?: string | null
+  category_slug?: string | null
   brand_ids?: number[]
   brand_id?: number | null
+  brands?: string[] | string
+  brand_slugs?: string[] | string
   search?: string
   min_price?: number | null
   max_price?: number | null

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -19,7 +21,10 @@ class DatabaseSeeder extends Seeder
             BrandSeeder::class,
             UserSeeder::class,
             ProductSeeder::class,
-            AdminDummySeeder::class,
+            CouponSeeder::class,
+            OrderDemoSeeder::class,
+            ProductInteractionSeeder::class,
+            WarrantyClaimSeeder::class,
         ]);
     }
 }

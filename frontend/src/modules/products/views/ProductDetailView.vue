@@ -38,7 +38,7 @@
         <span class="text-outline">/</span>
         <RouterLink
           v-if="product.category"
-          :to="{ path: '/products', query: { category_id: product.category_id } }"
+          :to="{ path: '/products', query: { category: product.category_slug || product.category_id } }"
           class="hover:text-primary transition-colors"
         >
           {{ product.category }}
@@ -225,7 +225,7 @@
             Có thể bạn cũng thích
           </h2>
           <RouterLink
-            :to="{ path: '/products', query: { category_id: product.category_id } }"
+            :to="{ path: '/products', query: { category: product.category_slug || product.category_id } }"
             class="text-xs font-bold text-primary hover:underline flex items-center gap-1"
           >
             Xem tất cả

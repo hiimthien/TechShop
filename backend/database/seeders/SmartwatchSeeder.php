@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Support\SeedImage;
 use Database\Seeders\Concerns\SeedsProductCatalog;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -27,14 +28,14 @@ class SmartwatchSeeder extends Seeder
                         'sku' => 'AW-ULTRA2-ALPINE',
                         'price' => 21990000,
                         'stock' => 25,
-                        'image_url' => 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=800&auto=format&fit=crop&q=85',
+                        'image_url' => SeedImage::for('dong-ho-apple-watch-ultra-2-gps-cellular-49mm', 'titan-tu-nhien-day-alpine-xanh-reu'),
                     ],
                     [
                         'name' => 'Titan Tự Nhiên - Dây Trail Cam Xám',
                         'sku' => 'AW-ULTRA2-TRAIL',
                         'price' => 21990000,
                         'stock' => 20,
-                        'image_url' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=85',
+                        'image_url' => SeedImage::for('dong-ho-apple-watch-ultra-2-gps-cellular-49mm', 'titan-tu-nhien-day-trail-cam-xam'),
                     ],
                 ],
             ],
@@ -49,14 +50,14 @@ class SmartwatchSeeder extends Seeder
                         'sku' => 'AW-S9-45-MID',
                         'price' => 10990000,
                         'stock' => 35,
-                        'image_url' => 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=800&auto=format&fit=crop&q=85',
+                        'image_url' => SeedImage::for('dong-ho-apple-watch-series-9-gps-45mm', 'vien-nhom-den-midnight-day-the-thao-ml'),
                     ],
                     [
                         'name' => 'Viền Nhôm Bạc Starlight - Dây Thể Thao S/M',
                         'sku' => 'AW-S9-45-STA',
                         'price' => 10990000,
                         'stock' => 30,
-                        'image_url' => 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800&auto=format&fit=crop&q=85',
+                        'image_url' => SeedImage::for('dong-ho-apple-watch-series-9-gps-45mm', 'vien-nhom-bac-starlight-day-the-thao-sm'),
                     ],
                 ],
             ],
@@ -73,14 +74,14 @@ class SmartwatchSeeder extends Seeder
                         'sku' => 'GW-ULTRA-GRAY-ORG',
                         'price' => 16990000,
                         'stock' => 20,
-                        'image_url' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=85',
+                        'image_url' => SeedImage::for('dong-ho-samsung-galaxy-watch-ultra-47mm-lte', 'xam-titan-day-cam-the-thao'),
                     ],
                     [
                         'name' => 'Trắng Titan Dây Trắng',
                         'sku' => 'GW-ULTRA-WHITE',
                         'price' => 16990000,
                         'stock' => 15,
-                        'image_url' => 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800&auto=format&fit=crop&q=85',
+                        'image_url' => SeedImage::for('dong-ho-samsung-galaxy-watch-ultra-47mm-lte', 'trang-titan-day-trang'),
                     ],
                 ],
             ],
@@ -95,7 +96,7 @@ class SmartwatchSeeder extends Seeder
                         'sku' => 'GW6-CLA-43-BLACK',
                         'price' => 7490000,
                         'stock' => 30,
-                        'image_url' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=85',
+                        'image_url' => SeedImage::for('dong-ho-samsung-galaxy-watch-6-classic-lte-43mm', 'den-classic-sang-trong'),
                     ],
                 ],
             ],
@@ -112,7 +113,7 @@ class SmartwatchSeeder extends Seeder
                         'sku' => 'GARMIN-FENIX7P-SOLAR',
                         'price' => 22490000,
                         'stock' => 15,
-                        'image_url' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=85',
+                        'image_url' => SeedImage::for('dong-ho-the-thao-dinh-cao-garmin-fenix-7-pro-sapphire-solar', 'titan-carbon-dlc-den-xam'),
                     ],
                 ],
             ],
@@ -127,14 +128,14 @@ class SmartwatchSeeder extends Seeder
                         'sku' => 'GARMIN-FR965-YELLOW',
                         'price' => 16490000,
                         'stock' => 25,
-                        'image_url' => 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800&auto=format&fit=crop&q=85',
+                        'image_url' => SeedImage::for('dong-ho-chay-bo-chuyen-nghiep-garmin-forerunner-965-amoled', 'vang-chanh-nang-dong-amp-yellow'),
                     ],
                     [
                         'name' => 'Đen Carbon (Carbon Black)',
                         'sku' => 'GARMIN-FR965-BLACK',
                         'price' => 16490000,
                         'stock' => 20,
-                        'image_url' => 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=800&auto=format&fit=crop&q=85',
+                        'image_url' => SeedImage::for('dong-ho-chay-bo-chuyen-nghiep-garmin-forerunner-965-amoled', 'den-carbon-carbon-black'),
                     ],
                 ],
             ],

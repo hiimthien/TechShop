@@ -35,6 +35,9 @@ export interface CustomerOrder {
   discount_amount: number
   final_total: number
   status: 'pending' | 'processing' | 'shipping' | 'delivered' | 'cancelled'
+  payment_method?: string
+  payment_status?: 'unpaid' | 'pending' | 'paid' | 'failed' | 'refunded'
+  payment_transaction_id?: string | null
   created_at: string
   created_at_raw?: string
   address?: {

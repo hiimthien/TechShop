@@ -24,8 +24,10 @@ class ProductResource extends JsonResource
             'slug'           => $this->slug,
             'brand'          => $this->whenLoaded('brand', fn() => $this->brand->name),
             'brand_id'       => $this->brand_id,
+            'brand_slug'     => $this->whenLoaded('brand', fn() => $this->brand->slug),
             'category'       => $this->whenLoaded('category', fn() => $this->category->name),
             'category_id'    => $this->category_id,
+            'category_slug'  => $this->whenLoaded('category', fn() => $this->category->slug),
             'thumbnail'      => $this->whenLoaded('images', fn() => optional($this->images->first())->image_url),
             'starting_price' => $this->variants_min_price ?? $this->whenLoaded('variants', fn() => $this->variants->min('price')),
             'original_price' => $this->whenLoaded('variants', function () {

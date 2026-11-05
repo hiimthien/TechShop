@@ -24,9 +24,14 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $prefixes = ['090', '091', '093', '094', '096', '097', '098', '086', '088', '089', '070', '079', '077'];
+        $phone = fake()->randomElement($prefixes) . fake()->numerify('#######');
+
         return [
-            'name' => fake()->name(),
+            'name' => fake('vi_VN')->name(),
             'email' => fake()->unique()->safeEmail(),
+            'phone' => $phone,
+            'role' => 'customer',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),

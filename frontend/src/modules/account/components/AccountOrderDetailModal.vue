@@ -15,8 +15,14 @@
             <span class="material-symbols-outlined text-[15px]">info</span>
             Trạng thái hiện tại
           </div>
-          <div class="pt-1">
+          <div class="pt-1 flex items-center gap-2">
             <StatusBadge :status="order.status" />
+            <span
+              v-if="order.payment_status === 'paid'"
+              class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+            >
+              Đã thanh toán
+            </span>
           </div>
         </div>
 
@@ -76,6 +82,35 @@
         </div>
       </div>
 
+      <!-- Thông tin phương thức thanh toán -->
+      <div class="p-3.5 bg-surface-container-low/40 rounded-2xl border border-outline-variant/30 space-y-1.5 text-xs">
+        <div class="font-bold text-on-surface text-[11px] uppercase tracking-wider text-outline flex items-center gap-1">
+          <span class="material-symbols-outlined text-[15px]">payments</span>
+          Thông tin thanh toán
+        </div>
+        <div class="flex justify-between items-center pt-1">
+          <span class="text-on-surface-variant">Phương thức:</span>
+          <span class="font-bold text-on-surface">
+            {{ formatPaymentMethod(order.payment_method) }}
+          </span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-on-surface-variant">Trạng thái thanh toán:</span>
+          <span
+            :class="[
+              'font-bold text-xs',
+              order.payment_status === 'paid' ? 'text-emerald-600' : 'text-amber-600'
+            ]"
+          >
+            {{ formatPaymentStatus(order.payment_status) }}
+          </span>
+        </div>
+        <div v-if="order.payment_transaction_id" class="flex justify-between items-center">
+          <span class="text-on-surface-variant">Mã giao dịch:</span>
+          <span class="font-mono text-on-surface font-semibold">{{ order.payment_transaction_id }}</span>
+        </div>
+      </div>
+
       <!-- Tổng tiền & Chi tiết thanh toán -->
       <div class="border-t border-outline-variant/20 pt-4 space-y-2 text-xs">
         <div class="flex justify-between text-on-surface-variant">
@@ -98,19 +133,38 @@
     </div>
 
     <template #footer>
-      <button
-        type="button"
-        @click="$emit('close')"
-        class="px-5 py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-hover shadow-sm transition-colors"
-      >
-        Đóng
-      </button>
+      <div class="flex items-center justify-between w-full">
+        <!-- Nút Thanh toán ngay nếu chưa trả qua VNPay -->
+        <div>
+          <button
+            v-if="order && order.payment_method === 'vnpay' && order.payment_status !== 'paid' && order.status === 'pending'"
+            type="button"
+            :disabled="isPaying"
+            @click="payNow"
+            class="px-4 py-2.5 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-60"
+          >
+            <span v-if="isPaying" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+            <span v-else class="material-symbols-outlined text-sm">credit_card</span>
+            <span>{{ isPaying ? 'Đang chuyển hướng...' : 'Thanh toán ngay qua VNPay' }}</span>
+          </button>
+        </div>
+
+        <button
+          type="button"
+          @click="$emit('close')"
+          class="px-5 py-2.5 bg-surface-container-high text-on-surface text-xs font-bold rounded-xl hover:bg-surface-container-highest transition-colors"
+        >
+          Đóng
+        </button>
+      </div>
     </template>
   </BaseModal>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import type { CustomerOrder, OrderItemDetail } from '../services/accountService'
+import { checkoutService } from '@/modules/checkout/services/checkoutService'
 import { useFormatters } from '@/core/composables/useFormatters'
 import BaseModal from '@/core/components/ui/BaseModal.vue'
 import StatusBadge from '@/core/components/ui/StatusBadge.vue'
@@ -119,12 +173,42 @@ interface Props {
   order: CustomerOrder | null
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 defineEmits<{
   (e: 'close'): void
   (e: 'request-warranty', item: OrderItemDetail): void
 }>()
 
 const { formatPrice } = useFormatters()
-</script>
+const isPaying = ref(false)
 
+function formatPaymentMethod(method?: string): string {
+  if (method === 'vnpay') return 'Cổng thanh toán VNPAY'
+  if (method === 'bank_transfer') return 'Chuyển khoản VietQR'
+  return 'Thanh toán khi nhận hàng (COD)'
+}
+
+function formatPaymentStatus(status?: string): string {
+  if (status === 'paid') return 'Đã thanh toán'
+  if (status === 'pending') return 'Chờ thanh toán'
+  if (status === 'failed') return 'Giao dịch thất bại'
+  return 'Chưa thanh toán'
+}
+
+async function payNow() {
+  if (!props.order) return
+  isPaying.value = true
+  try {
+    const data = await checkoutService.createVnpayPaymentUrl(props.order.id)
+    if (data?.payment_url) {
+      window.location.href = data.payment_url
+    }
+  } catch (err: unknown) {
+    console.error('Lỗi khi mở cổng thanh toán VNPay:', err)
+    const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+    alert(msg || 'Không thể kết nối cổng VNPay lúc này. Vui lòng thử lại sau.')
+  } finally {
+    isPaying.value = false
+  }
+}
+</script>

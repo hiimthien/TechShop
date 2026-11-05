@@ -82,12 +82,24 @@ class CatalogApiTest extends TestCase
         $res1 = $this->getJson('/api/products?category=dien-thoai');
         $res1->assertStatus(200);
         $this->assertCount(1, $res1->json('data'));
+        $this->assertEquals('dien-thoai', $res1->json('data.0.category_slug'));
+        $this->assertEquals('apple', $res1->json('data.0.brand_slug'));
 
         // 2. Query with alias 'smartphones'
         $res2 = $this->getJson('/api/products?category=smartphones');
         $res2->assertStatus(200);
         $this->assertCount(1, $res2->json('data'));
         $this->assertEquals('iPhone 15 Pro', $res2->json('data.0.name'));
+
+        // 3. Query with category_slug parameter
+        $res3 = $this->getJson('/api/products?category_slug=dien-thoai');
+        $res3->assertStatus(200);
+        $this->assertCount(1, $res3->json('data'));
+
+        // 4. Backward compatibility: query with category_id
+        $res4 = $this->getJson('/api/products?category_id=' . $category->id);
+        $res4->assertStatus(200);
+        $this->assertCount(1, $res4->json('data'));
     }
 }
 

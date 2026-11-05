@@ -14,6 +14,9 @@ class BrandSeeder extends Seeder
      */
     public function run(): void
     {
+        // Xóa các thương hiệu không có sản phẩm nếu còn tồn tại
+        Brand::whereIn('slug', ['vivo', 'realme', 'honor', 'hp', 'acer', 'huawei', 'lg'])->delete();
+
         $brands = [
             // Smartphone & Tablet Giants
             [
@@ -40,24 +43,6 @@ class BrandSeeder extends Seeder
                 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/b/b8/OPPO_Logo.svg',
                 'description' => 'Chuyên gia chân dung AI, smartphone màn hình gập cao cấp và sạc siêu nhanh SuperVOOC.',
             ],
-            [
-                'name' => 'Vivo',
-                'slug' => 'vivo',
-                'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/e/e5/Vivo_mobile_logo.png',
-                'description' => 'Thương hiệu smartphone camera ống kính Zeiss đẳng cấp, thiết kế mỏng nhẹ thời trang.',
-            ],
-            [
-                'name' => 'Realme',
-                'slug' => 'realme',
-                'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Realme_logo.svg',
-                'description' => 'Thương hiệu công nghệ dành cho giới trẻ với hiệu năng mạnh mẽ và sạc pin thần tốc.',
-            ],
-            [
-                'name' => 'Honor',
-                'slug' => 'honor',
-                'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/7/77/Honor_logo_2022.svg',
-                'description' => 'Smartphone màn hình gập siêu mỏng Magic V và công nghệ bảo vệ mắt AI tân tiến.',
-            ],
 
             // Laptop & PC Giants
             [
@@ -79,18 +64,6 @@ class BrandSeeder extends Seeder
                 'description' => 'Hãng laptop số 1 thế giới với bàn phím ThinkPad huyền thoại và dòng máy chơi game Legion.',
             ],
             [
-                'name' => 'HP',
-                'slug' => 'hp',
-                'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/a/ad/HP_logo_2012.svg',
-                'description' => 'Laptop văn phòng Spectre, Envy, Pavilion sang trọng cùng cỗ máy gaming OMEN, Victus.',
-            ],
-            [
-                'name' => 'Acer',
-                'slug' => 'acer',
-                'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/0/00/Acer_2011.svg',
-                'description' => 'Thương hiệu laptop quốc dân với dòng máy gaming Nitro, Predator và dòng văn phòng Swift.',
-            ],
-            [
                 'name' => 'MSI',
                 'slug' => 'msi',
                 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/MSI_Logo_2019.svg/1200px-MSI_Logo_2019.svg.png',
@@ -103,12 +76,6 @@ class BrandSeeder extends Seeder
                 'slug' => 'garmin',
                 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/1/1d/Garmin_logo_2020.svg',
                 'description' => 'Thương hiệu đồng hồ thể thao định vị GPS chuyên nghiệp dành cho vận động viên và dã ngoại.',
-            ],
-            [
-                'name' => 'Huawei',
-                'slug' => 'huawei',
-                'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/0/03/Huawei_Pin_Logo.svg',
-                'description' => 'Dòng smartwatch Watch GT thời lượng pin 2 tuần, theo dõi sức khỏe và thể thao cao cấp.',
             ],
 
             // Audio & Speakers
@@ -155,12 +122,6 @@ class BrandSeeder extends Seeder
                 'slug' => 'keychron',
                 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Keychron_Logo.svg/1200px-Keychron_Logo.svg.png',
                 'description' => 'Hãng bàn phím cơ không dây tùy biến custom cao cấp tương thích hoàn hảo cả Mac và Windows.',
-            ],
-            [
-                'name' => 'LG',
-                'slug' => 'lg',
-                'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/b/bf/LG_logo_%282015%29.svg',
-                'description' => 'Dẫn đầu công nghệ màn hình OLED, dòng UltraGear chuyên game và laptop siêu nhẹ LG Gram.',
             ],
         ];
 

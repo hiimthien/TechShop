@@ -190,21 +190,32 @@ const products = ref<Product[]>([])
 const categories = ref<Category[]>([])
 const brands = ref<Brand[]>([])
 
-const selectedCategory = ref<number | null>(null)
+const selectedCategory = ref<string | null>(null)
 const selectedBrandIds = ref<number[]>([])
 
 function syncCategoryFromRoute() {
   const catSlug = (route.query.category || route.query.category_slug) as string
-  if (catSlug && categories.value.length > 0) {
-    const match = categories.value.find((c) => c.slug.toLowerCase() === catSlug.toLowerCase())
-    if (match) {
-      selectedCategory.value = match.id
-      return
-    }
+  if (catSlug) {
+    selectedCategory.value = catSlug.toLowerCase()
+    return
   }
   if (route.query.category_id) {
-    selectedCategory.value = Number(route.query.category_id)
+    const catId = Number(route.query.category_id)
+    if (categories.value.length > 0) {
+      const match = categories.value.find((c) => c.id === catId)
+      if (match) {
+        selectedCategory.value = match.slug
+        const newQuery = { ...route.query }
+        delete newQuery.category_id
+        newQuery.category = match.slug
+        router.replace({ query: newQuery })
+        return
+      }
+    }
+    selectedCategory.value = String(route.query.category_id)
+    return
   }
+  selectedCategory.value = null
 }
 
 function syncBrandsFromRoute() {
@@ -258,7 +269,13 @@ const errorMessage = ref<string>('')
 
 const selectedCategoryName = computed(() => {
   if (!selectedCategory.value) return null
-  return categories.value.find((c) => c.id === selectedCategory.value)?.name || null
+  return (
+    categories.value.find(
+      (c) =>
+        c.slug === selectedCategory.value ||
+        String(c.id) === String(selectedCategory.value)
+    )?.name || null
+  )
 })
 
 const activeBrandList = computed(() => {
@@ -293,6 +310,8 @@ const fetchInitialData = async () => {
     ])
     categories.value = cats
     brands.value = brs
+    syncCategoryFromRoute()
+    syncBrandsFromRoute()
   } catch (error) {
     console.error('Lỗi khi tải danh mục hoặc thương hiệu:', error)
   }
@@ -304,7 +323,8 @@ const fetchProducts = async () => {
 
   try {
     const res = await productService.getProducts({
-      category_id: selectedCategory.value,
+      category: selectedCategory.value || undefined,
+      category_slug: selectedCategory.value || undefined,
       brand_ids: selectedBrandIds.value.length > 0 ? selectedBrandIds.value : undefined,
       min_price: selectedMinPrice.value,
       max_price: selectedMaxPrice.value,
@@ -332,7 +352,14 @@ const fetchProducts = async () => {
 const updateRouterQuery = () => {
   const query: Record<string, string | number> = {}
 
-  if (selectedCategory.value) query.category_id = selectedCategory.value
+  if (selectedCategory.value) {
+    const match = categories.value.find(
+      (c) =>
+        c.slug === selectedCategory.value ||
+        String(c.id) === String(selectedCategory.value)
+    )
+    query.category = match ? match.slug : selectedCategory.value
+  }
   if (selectedBrandIds.value.length > 0) query.brand_ids = selectedBrandIds.value.join(',')
   if (selectedMinPrice.value !== null && selectedMinPrice.value !== undefined) query.min_price = selectedMinPrice.value
   if (selectedMaxPrice.value !== null && selectedMaxPrice.value !== undefined) query.max_price = selectedMaxPrice.value

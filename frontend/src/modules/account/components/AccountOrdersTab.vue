@@ -62,7 +62,23 @@
             <span class="font-black text-sm text-primary tracking-wider">{{ order.order_code }}</span>
             <span class="text-outline text-xs">• {{ order.created_at }}</span>
           </div>
-          <div>
+          <div class="flex items-center gap-2">
+            <!-- Payment Badge -->
+            <span
+              v-if="order.payment_status === 'paid'"
+              class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center gap-1"
+            >
+              <span class="material-symbols-outlined text-[13px]">check_circle</span>
+              Đã thanh toán
+            </span>
+            <span
+              v-else-if="order.payment_method === 'vnpay' && order.status === 'pending'"
+              class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1"
+            >
+              <span class="material-symbols-outlined text-[13px]">schedule</span>
+              Chờ thanh toán VNPay
+            </span>
+
             <StatusBadge :status="order.status" :label="getStatusText(order.status)" />
           </div>
         </div>
@@ -113,6 +129,19 @@
           </div>
 
           <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <!-- Nút Thanh toán ngay VNPay nếu chưa trả -->
+            <button
+              v-if="order.payment_method === 'vnpay' && order.payment_status !== 'paid' && order.status === 'pending'"
+              type="button"
+              :disabled="payingOrderId === order.id"
+              @click="payNow(order.id)"
+              class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-colors flex items-center gap-1 disabled:opacity-60"
+            >
+              <span v-if="payingOrderId === order.id" class="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>
+              <span v-else class="material-symbols-outlined text-[14px]">credit_card</span>
+              <span>{{ payingOrderId === order.id ? 'Đang kết nối...' : 'Thanh toán VNPay' }}</span>
+            </button>
+
             <button
               v-if="order.status === 'pending'"
               type="button"
@@ -139,6 +168,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import type { CustomerOrder } from '../services/accountService'
+import { checkoutService } from '@/modules/checkout/services/checkoutService'
 import { useFormatters } from '@/core/composables/useFormatters'
 import StatusBadge from '@/core/components/ui/StatusBadge.vue'
 import EmptyState from '@/core/components/ui/EmptyState.vue'
@@ -161,6 +191,23 @@ const router = useRouter()
 const { formatPrice } = useFormatters()
 
 const currentFilter = ref<string>('all')
+const payingOrderId = ref<number | null>(null)
+
+async function payNow(orderId: number) {
+  payingOrderId.value = orderId
+  try {
+    const data = await checkoutService.createVnpayPaymentUrl(orderId)
+    if (data?.payment_url) {
+      window.location.href = data.payment_url
+    }
+  } catch (err: unknown) {
+    console.error('Lỗi khi mở cổng thanh toán VNPay:', err)
+    const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+    alert(msg || 'Không thể kết nối cổng VNPay lúc này. Vui lòng thử lại sau.')
+  } finally {
+    payingOrderId.value = null
+  }
+}
 
 const orderStatuses = [
   { key: 'all', label: 'Tất cả' },

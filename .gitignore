@@ -21,6 +21,9 @@ AGENTS.md
 # Design references
 stitch_nexus_tech_e_commerce/
 
+# Temporary demo & reports
+demo/
+
 # IDE configurations
 .vscode/
 .claude/

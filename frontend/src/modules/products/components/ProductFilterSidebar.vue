@@ -50,9 +50,9 @@
               v-for="cat in categories"
               :key="cat.id"
               type="button"
-              @click="selectCategory(cat.id)"
+              @click="selectCategory(cat.slug)"
               class="flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-colors font-medium"
-              :class="selectedCategory === cat.id ? 'bg-primary text-on-primary font-bold shadow-xs' : 'hover:bg-surface-container-low text-on-surface'"
+              :class="selectedCategory === cat.slug || selectedCategory === cat.id || String(selectedCategory) === String(cat.id) ? 'bg-primary text-on-primary font-bold shadow-xs' : 'hover:bg-surface-container-low text-on-surface'"
             >
               <span>{{ cat.name }}</span>
             </button>
@@ -287,7 +287,7 @@ const pricePresets: PricePreset[] = [
 const props = defineProps<{
   categories: Category[]
   brands: Brand[]
-  selectedCategory: number | null
+  selectedCategory: string | number | null
   selectedBrandIds: number[]
   selectedMinPrice: number | null
   selectedMaxPrice: number | null
@@ -299,7 +299,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:selectedCategory', value: number | null): void
+  (e: 'update:selectedCategory', value: string | null): void
   (e: 'update:selectedBrandIds', value: number[]): void
   (e: 'update:selectedMinPrice', value: number | null): void
   (e: 'update:selectedMaxPrice', value: number | null): void
@@ -314,7 +314,14 @@ const emit = defineEmits<{
 
 const currentCategorySlug = computed(() => {
   if (!props.selectedCategory) return null
-  return props.categories.find((c) => c.id === props.selectedCategory)?.slug || null
+  if (typeof props.selectedCategory === 'string' && isNaN(Number(props.selectedCategory))) {
+    return props.selectedCategory
+  }
+  return (
+    props.categories.find(
+      (c) => c.slug === props.selectedCategory || c.id === Number(props.selectedCategory)
+    )?.slug || null
+  )
 })
 
 const hasActiveFilter = computed(() => {
@@ -336,8 +343,8 @@ const toggleInStock = (checked: boolean) => {
   nextTick(() => emit('apply'))
 }
 
-const selectCategory = (id: number | null) => {
-  emit('update:selectedCategory', id)
+const selectCategory = (val: string | null) => {
+  emit('update:selectedCategory', val)
   // Khi đổi danh mục, reset các filter spec đặc thù của danh mục cũ
   emit('update:selectedRam', null)
   emit('update:selectedStorage', null)

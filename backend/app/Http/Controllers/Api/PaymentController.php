@@ -45,7 +45,25 @@ class PaymentController extends Controller
             return $this->errorResponse('Đơn hàng này đã bị hủy, không thể tiếp tục thanh toán.', 422);
         }
 
-        $paymentUrl = $this->vnpayService->createPaymentUrl($order, $request->ip() ?? '127.0.0.1');
+        // Cập nhật phương thức thanh toán sang vnpay nếu cần
+        if ($order->payment_method !== 'vnpay' || $order->payment_status === 'unpaid') {
+            $order->update([
+                'payment_method' => 'vnpay',
+                'payment_status' => 'pending',
+            ]);
+        }
+
+        $clientIp = $request->ip() ?? '127.0.0.1';
+        $paymentUrl = $this->vnpayService->createPaymentUrl($order, $clientIp);
+
+        // Ghi Audit Log khởi tạo thanh toán
+        Log::info("[VNPAY] Khởi tạo yêu cầu thanh toán", [
+            'order_id'    => $order->id,
+            'user_id'     => Auth::id(),
+            'amount'      => (float) $order->total_price,
+            'ip'          => $clientIp,
+            'created_at'  => now()->toDateTimeString(),
+        ]);
 
         return $this->successResponse([
             'payment_url' => $paymentUrl,
@@ -60,9 +78,21 @@ class PaymentController extends Controller
     public function handleVnpayReturn(Request $request): JsonResponse
     {
         $params = $request->all();
+
+        // Ghi Audit Log toàn bộ callback nhận được từ VNPay
+        Log::info('[VNPAY Return] Nhận callback giao dịch từ trình duyệt khách', [
+            'txn_ref'        => $params['vnp_TxnRef'] ?? null,
+            'response_code'  => $params['vnp_ResponseCode'] ?? null,
+            'transaction_no' => $params['vnp_TransactionNo'] ?? null,
+            'amount'         => $params['vnp_Amount'] ?? null,
+            'bank_code'      => $params['vnp_BankCode'] ?? null,
+            'pay_date'       => $params['vnp_PayDate'] ?? null,
+        ]);
+
         $result = $this->vnpayService->verifyCallback($params);
 
         if (!$result['is_valid']) {
+            Log::warning('[VNPAY Return] Chữ ký không hợp lệ!', ['params' => $params]);
             return $this->errorResponse($result['message'], 400);
         }
 
@@ -134,10 +164,18 @@ class PaymentController extends Controller
                 $order->update(['payment_status' => 'failed']);
             }
 
-            return $this->errorResponse('Giao dịch thanh toán không thành công hoặc bị hủy.', 400, [
-                'order_id'      => $order->id,
-                'response_code' => $result['response_code'],
-            ]);
+            return response()->json([
+                'status'  => false,
+                'message' => $result['message'],
+                'data'    => [
+                    'order_id'      => $order->id,
+                    'order_code'    => '#TS-' . str_pad((string) $order->id, 6, '0', STR_PAD_LEFT),
+                    'response_code' => $result['response_code'],
+                ],
+                'errors'  => [
+                    'response_code' => $result['response_code'],
+                ],
+            ], 400);
         }
     }
 
@@ -147,9 +185,21 @@ class PaymentController extends Controller
     public function handleVnpayIpn(Request $request): JsonResponse
     {
         $params = $request->all();
+
+        // Ghi Audit Log Webhook IPN nhận trực tiếp Server-to-Server
+        Log::info('[VNPAY IPN] Nhận Webhook IPN Server-to-Server từ VNPay', [
+            'txn_ref'        => $params['vnp_TxnRef'] ?? null,
+            'response_code'  => $params['vnp_ResponseCode'] ?? null,
+            'transaction_no' => $params['vnp_TransactionNo'] ?? null,
+            'amount'         => $params['vnp_Amount'] ?? null,
+            'bank_code'      => $params['vnp_BankCode'] ?? null,
+            'pay_date'       => $params['vnp_PayDate'] ?? null,
+        ]);
+
         $result = $this->vnpayService->verifyCallback($params);
 
         if (!$result['is_valid']) {
+            Log::warning('[VNPAY IPN] IPN Chữ ký không hợp lệ!', ['params' => $params]);
             return response()->json(['RspCode' => '97', 'Message' => 'Invalid Checksum']);
         }
 

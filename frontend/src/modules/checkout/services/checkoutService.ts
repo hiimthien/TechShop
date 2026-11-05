@@ -46,6 +46,21 @@ export interface VnpayUrlResponse {
   }
 }
 
+export interface VnpayReturnResponse {
+  status: boolean
+  message: string
+  data?: {
+    order_id: number
+    order_code: string
+    transaction_no?: string
+    amount?: number
+    response_code?: string
+  }
+  errors?: {
+    response_code?: string
+  }
+}
+
 export const checkoutService = {
   async getAddresses(): Promise<UserAddress[]> {
     const res = await api.get<{ status: boolean; data: UserAddress[] }>('/addresses')
@@ -80,8 +95,8 @@ export const checkoutService = {
     return res.data
   },
 
-  async handleVnpayReturn(params: Record<string, string>): Promise<any> {
-    const res = await api.get('/payment/vnpay/return', { params })
+  async handleVnpayReturn(params: Record<string, string>): Promise<VnpayReturnResponse> {
+    const res = await api.get<VnpayReturnResponse>('/payment/vnpay/return', { params })
     return res.data
   },
 }

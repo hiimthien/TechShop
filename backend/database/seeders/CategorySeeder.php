@@ -50,6 +50,9 @@ class CategorySeeder extends Seeder
             ],
         ];
 
+        // Xóa danh mục cũ trùng lặp nếu còn sót
+        Category::where('slug', 'tai-nghe')->delete();
+
         foreach ($categories as $category) {
             Category::updateOrCreate(['slug' => $category['slug']], $category);
         }

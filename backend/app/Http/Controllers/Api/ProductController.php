@@ -21,28 +21,36 @@ class ProductController extends Controller
 
         // Lọc danh mục: Hỗ trợ cả slug (bảo mật SEO không lộ ID) và category_id (tương thích ngược)
         if ($request->filled('category_slug') || $request->filled('category')) {
-            $catSlug = (string) ($request->input('category_slug') ?: $request->input('category'));
-            $aliases = [
-                'smartphones'  => 'dien-thoai',
-                'smartphone'   => 'dien-thoai',
-                'laptops'      => 'laptop',
-                'keyboards'    => 'ban-phim',
-                'keyboard'     => 'ban-phim',
-                'monitors'     => 'man-hinh',
-                'monitor'      => 'man-hinh',
-                'headphones'   => 'tai-nghe',
-                'headphone'    => 'tai-nghe',
-                'audio'        => 'tai-nghe-am-thanh',
-                'smartwatches' => 'dong-ho-thong-minh',
-                'smartwatch'   => 'dong-ho-thong-minh',
-                'watches'      => 'dong-ho-thong-minh',
-                'mouse'        => 'chuot',
-                'mice'         => 'chuot',
-            ];
-            $targetSlug = $aliases[$catSlug] ?? $catSlug;
-            $query->whereHas('category', fn($q) => $q->where('slug', $targetSlug));
+            $rawCat = (string) ($request->input('category_slug') ?: $request->input('category'));
+            if (is_numeric($rawCat)) {
+                $query->where('category_id', (int) $rawCat);
+            } else {
+                $aliases = [
+                    'smartphones'  => 'dien-thoai',
+                    'smartphone'   => 'dien-thoai',
+                    'laptops'      => 'laptop',
+                    'keyboards'    => 'ban-phim',
+                    'keyboard'     => 'ban-phim',
+                    'monitors'     => 'man-hinh',
+                    'monitor'      => 'man-hinh',
+                    'headphones'   => 'tai-nghe',
+                    'headphone'    => 'tai-nghe',
+                    'audio'        => 'tai-nghe-am-thanh',
+                    'smartwatches' => 'dong-ho-thong-minh',
+                    'smartwatch'   => 'dong-ho-thong-minh',
+                    'watches'      => 'dong-ho-thong-minh',
+                    'mouse'        => 'chuot',
+                    'mice'         => 'chuot',
+                ];
+                $targetSlug = $aliases[$rawCat] ?? $rawCat;
+                $query->whereHas('category', fn($q) => $q->where('slug', $targetSlug));
+            }
         } elseif ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
+            if (is_numeric($request->category_id)) {
+                $query->where('category_id', (int) $request->category_id);
+            } else {
+                $query->whereHas('category', fn($q) => $q->where('slug', $request->category_id));
+            }
         }
 
         // Lọc đa thương hiệu: Hỗ trợ cả slug (bảo mật SEO không lộ ID) và brand_ids
