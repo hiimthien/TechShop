@@ -107,6 +107,41 @@
           <span>Tiếp tục với Google</span>
         </button>
 
+        <!-- Quick Demo Login Section for Portfolio Reviewers -->
+        <div class="mt-6 pt-5 border-t border-outline-variant/30 space-y-2.5">
+          <div class="text-[11px] font-bold text-on-surface-variant flex items-center justify-between">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px] text-primary">bolt</span>
+              Trải nghiệm nhanh (Tài khoản Demo)
+            </span>
+            <span class="text-[10px] text-outline">1-Click</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              @click="quickLogin('admin@techshop.com', 'password')"
+              class="py-2 px-3 bg-surface-container hover:bg-surface-container-high rounded-xl text-left border border-outline-variant/30 transition-all hover:border-primary/50 group"
+            >
+              <div class="text-[11px] font-bold text-on-surface group-hover:text-primary flex items-center gap-1">
+                <span>👑</span> Admin CMS
+              </div>
+              <div class="text-[10px] text-outline mt-0.5 truncate">Quản trị & Doanh thu</div>
+            </button>
+
+            <button
+              type="button"
+              @click="quickLogin('customer@techshop.com', 'password')"
+              class="py-2 px-3 bg-surface-container hover:bg-surface-container-high rounded-xl text-left border border-outline-variant/30 transition-all hover:border-primary/50 group"
+            >
+              <div class="text-[11px] font-bold text-on-surface group-hover:text-primary flex items-center gap-1">
+                <span>👤</span> Khách hàng
+              </div>
+              <div class="text-[10px] text-outline mt-0.5 truncate">Mua sắm & Đơn hàng</div>
+            </button>
+          </div>
+        </div>
+
         <!-- Signup Link -->
         <p class="mt-6 text-center text-xs text-on-surface-variant">
           Chưa có tài khoản?
@@ -181,6 +216,12 @@ const handleLogin = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const quickLogin = async (demoEmail: string, demoPass: string) => {
+  email.value = demoEmail
+  password.value = demoPass
+  await handleLogin()
 }
 
 onMounted(() => {
